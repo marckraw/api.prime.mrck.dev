@@ -43,10 +43,11 @@ app.post('/chat', async (c) => {
       type: "anthropic",
     });
 
-    console.log("Tjhis is stuff")
-      console.log(config.ANTHROPIC_API_KEY)
+    const response = await anton.chat({
+      messages: validatedData.messages,
+    });
 
-    return c.json({validatedData, something: config.ANTHROPIC_API_KEY});
+    return c.json({response});
   } catch (e) {
     if (e instanceof z.ZodError) {
       return c.json(
