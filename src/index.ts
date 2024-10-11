@@ -33,6 +33,7 @@ app.get('/test', (c) => {
 
 app.post('/chat', async (c) => {
   const requestData = await c.req.json()
+  console.log("whatecer")
 
   try {
     const validatedData: RequestBody = requestSchema.parse(requestData);
