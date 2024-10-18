@@ -26,7 +26,7 @@ app.notFound((c) => {
 
 app.onError((err, c) => {
   console.error(`${err}`)
-  return c.json({message: 'Default Custom Internal server error', statusCode: 500}, 500)
+  return c.json({message: 'Default Custom Internal server error', statusCode: 500, additionalInfo: {err, c}}, 500)
 })
 
 export type AppType = typeof app
