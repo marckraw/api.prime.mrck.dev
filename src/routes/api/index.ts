@@ -1,6 +1,6 @@
 import {Hono} from "hono";
 import { bearerAuth } from 'hono/bearer-auth'
-import chatRouter from "../chat/chat";
+import chatRouter from "./chat/chat";
 import {config} from "../../config.env";
 import { cors } from 'hono/cors'
 

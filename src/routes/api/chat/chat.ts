@@ -1,25 +1,13 @@
 import {Hono} from "hono";
 import {streamText} from 'hono/streaming'
 import {AntonSDK} from "@mrck-labs/anton-sdk";
-import {z} from "zod";
 import {zValidator} from "@hono/zod-validator";
-
-export const requestSchema = z
-    .object({
-        messages: z.array(
-            z.object({
-                role: z.enum(["user", "system", "assistant"]),
-                content: z.string(),
-            })
-                .strict()
-        ),
-    })
-    .strict();
+import {chatRequestSchema} from "./validators/chat";
 
 const chatRouter = new Hono()
 
 chatRouter.post('/',
-    zValidator('json', requestSchema),
+    zValidator('json', chatRequestSchema),
     async (c) => {
         const requestData = c.req.valid('json');
 
