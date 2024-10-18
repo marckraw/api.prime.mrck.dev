@@ -2,8 +2,7 @@ import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { config } from './config.env'
-import chatRouter from './routes/chat/chat'
-import protectedRouter from './routes/protected'
+import apiRouter from './routes/api'
 import {pinoLogger} from "./middleware/pino-logger";
 
 
@@ -11,8 +10,7 @@ const app = new Hono()
 app.use(logger())
 app.use(pinoLogger());
 
-app.route('/chat', chatRouter)
-app.route('/protected', protectedRouter)
+app.route('/api', apiRouter)
 
 app.get('/', (c) => {
   return c.text('Hello Hono!')
