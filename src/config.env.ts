@@ -9,7 +9,8 @@ const envSchema = z.object({
     NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
     PORT: z.string().default('3000'),
     DATABASE_URL: z.string(),
-    ANTHROPIC_API_KEY: z.string()
+    ANTHROPIC_API_KEY: z.string(),
+    X_API_KEY: z.string()
 })
 
 // Parse and validate environment variables

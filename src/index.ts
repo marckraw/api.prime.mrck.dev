@@ -3,6 +3,7 @@ import { Hono } from 'hono'
 import { AntonSDK } from "@mrck-labs/anton-sdk";
 import { z } from "zod";
 import { config } from './config.env'
+import {authMiddleware} from "./middleware/auth";
 
 // Define a more strict schema for the request body
 const messageSchema = z
@@ -30,6 +31,10 @@ app.get('/', (c) => {
 app.get('/test', (c) => {
   return c.json({ message: 'Message man!. Hello Hono!' })
 })
+
+// Usage in your Hono app
+app.use('/protected/*', authMiddleware)
+app.get('/protected/resource', (c) => c.json({ message: 'Protected resource' }))
 
 app.post('/chat', async (c) => {
   const requestData = await c.req.json()
