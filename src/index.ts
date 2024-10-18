@@ -20,6 +20,8 @@ app.get('/test', (c) => {
   return c.json({ message: 'Message man!. Hello Hono!' })
 })
 
+export type AppType = typeof app
+
 const port = parseInt(config.PORT) || 3000
 console.log(`Server is running on port ${port}`)
 
@@ -27,3 +29,5 @@ serve({
   fetch: app.fetch,
   port
 })
+
+

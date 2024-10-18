@@ -1,10 +1,14 @@
 import {Hono} from "hono";
-import {authMiddleware} from "../../middleware/auth";
+import { bearerAuth } from 'hono/bearer-auth'
 import chatRouter from "../chat/chat";
+import {config} from "../../config.env";
 
 const apiRouter = new Hono()
 
-apiRouter.use('/*', authMiddleware)
+const token = config.X_API_KEY
+
+apiRouter.use('/*', bearerAuth({token}))
+
 apiRouter.route('/chat', chatRouter)
 apiRouter.get('/resource', (c) => c.json({ message: 'Protected resource' }))
 
