@@ -1,6 +1,8 @@
 import {Hono} from "hono";
+import { streamText } from 'hono/streaming'
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {z} from "zod";
+import {zValidator} from "@hono/zod-validator";
 
 // Define a more strict schema for the request body
 export const messageSchema = z
@@ -19,14 +21,12 @@ export const requestSchema = z
 // Infer the TypeScript type from the Zod schema
 export type RequestBody = z.infer<typeof requestSchema>;
 
-
 const chatRouter = new Hono()
 
-chatRouter.post('/', async (c) => {
-    const requestData = await c.req.json()
-
-    try {
-        const validatedData: RequestBody = requestSchema.parse(requestData);
+chatRouter.post('/',
+    zValidator('json', requestSchema),
+    async (c) => {
+        const requestData = c.req.valid('json');
 
         const anton = AntonSDK.create({
             model: "claude-3-5-sonnet-20240620",
@@ -35,18 +35,26 @@ chatRouter.post('/', async (c) => {
         });
 
         const response = await anton.chat({
-            messages: validatedData.messages,
+            messages: requestData.messages,
         });
 
         return c.json({response});
-    } catch (e) {
-        if (e instanceof z.ZodError) {
-            return c.json(
-                {error: "Invalid request body", details: e.errors},
-                {status: 400},
-            );
-        }
     }
+)
+
+chatRouter.get('/stream', (c) => {
+    return streamText(c, async (stream) => {
+        // Write a text with a new line ('\n').
+        await stream.writeln('Hello')
+        // Wait 1 second.
+        await stream.sleep(1000)
+        // Write a text without a new line.
+        await stream.write(`Hono!`)
+        await stream.sleep(2000)
+        await stream.writeln('Other stuff!')
+        await stream.sleep(4000)
+        await stream.write('Final!')
+    })
 })
 
 export default chatRouter
