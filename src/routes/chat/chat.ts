@@ -20,9 +20,9 @@ export const requestSchema = z
 export type RequestBody = z.infer<typeof requestSchema>;
 
 
-const chat = new Hono()
+const chatRouter = new Hono()
 
-chat.post('/', async (c) => {
+chatRouter.post('/', async (c) => {
     const requestData = await c.req.json()
 
     try {
@@ -49,4 +49,4 @@ chat.post('/', async (c) => {
     }
 })
 
-export default chat
+export default chatRouter
