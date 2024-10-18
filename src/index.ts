@@ -20,6 +20,15 @@ app.get('/test', (c) => {
   return c.json({ message: 'Message man!. Hello Hono!' })
 })
 
+app.notFound((c) => {
+  return c.json({ message: 'Not found', statusCode: 404 }, 404)
+})
+
+app.onError((err, c) => {
+  console.error(`${err}`)
+  return c.json({message: 'Default Custom Internal server error', statusCode: 500}, 500)
+})
+
 export type AppType = typeof app
 
 const port = parseInt(config.PORT) || 3000
