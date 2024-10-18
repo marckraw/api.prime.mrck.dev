@@ -1,25 +1,20 @@
 import {Hono} from "hono";
-import { streamText } from 'hono/streaming'
+import {streamText} from 'hono/streaming'
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {z} from "zod";
 import {zValidator} from "@hono/zod-validator";
 
-// Define a more strict schema for the request body
-export const messageSchema = z
-    .object({
-        role: z.enum(["user", "system", "assistant"]),
-        content: z.string(),
-    })
-    .strict();
-
 export const requestSchema = z
     .object({
-        messages: z.array(messageSchema),
+        messages: z.array(
+            z.object({
+                role: z.enum(["user", "system", "assistant"]),
+                content: z.string(),
+            })
+                .strict()
+        ),
     })
     .strict();
-
-// Infer the TypeScript type from the Zod schema
-export type RequestBody = z.infer<typeof requestSchema>;
 
 const chatRouter = new Hono()
 

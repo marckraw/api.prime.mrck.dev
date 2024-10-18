@@ -6,6 +6,7 @@ declare global {
             DATABASE_URL: string
             ANTHROPIC_API_KEY: string
             X_API_KEY: string
+            LOG_LEVEL: string
         }
     }
 }
