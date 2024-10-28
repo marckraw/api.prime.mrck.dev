@@ -7,7 +7,7 @@
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/zod-validator": "^0.4.1",
-    "@mrck-labs/anton-sdk": "^1.0.2",
+    "@mrck-labs/anton-sdk": "^1.1.1",
     "dotenv": "^16.4.5",
     "hono": "^4.6.4",
     "hono-pino": "^0.3.0",

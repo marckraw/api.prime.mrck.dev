@@ -11,3 +11,5 @@ export const chatRequestSchema = z
         ),
     })
     .strict();
+
+export const chatStreamRequestSchema = chatRequestSchema
