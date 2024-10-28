@@ -5,12 +5,15 @@ import {config} from "../../config.env";
 import { cors } from 'hono/cors'
 
 const apiRouter = new Hono()
-apiRouter.use(
-    '/*',
-    cors({
-        origin: ['https://example.com', 'https://example.org'],
-    })
-)
+apiRouter.use('/*', cors({
+    origin: ['http://localhost:8080', 'https://localhost:8080'], // Add your frontend URL
+    allowMethods: ['POST', 'GET', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+    maxAge: 600,
+    credentials: true
+  }))
+
 
 const token = config.X_API_KEY
 
