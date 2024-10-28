@@ -43,18 +43,24 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
 
             for await (const chunk of message) {
                 const text = chunk.toString()
+                // console.log("Chunk: ", text)
                 const lines = text.split('\n').filter(line => line.trim() !== '')
+                console.log("Lines: ", lines)
                 let finalText = ""
                 
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
                         try {
                             const data = JSON.parse(line.slice(6)) as any
+
+                            console.log("##")
+                            console.log(data)
+                            console.log("##")
                             
                             switch (data.type) {
                                 case 'content_block_delta':
                                     finalText += data.delta.text
-                                    console.log(finalText)
+                                    // console.log(finalText)
                                     await stream.write(data.delta.text)
                                     break
                                 case 'message_start':
