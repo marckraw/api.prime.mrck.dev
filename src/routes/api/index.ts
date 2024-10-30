@@ -6,7 +6,7 @@ import { cors } from 'hono/cors'
 
 const apiRouter = new Hono()
 apiRouter.use('/*', cors({
-    origin: ['http://localhost:8080', 'https://localhost:8080'], // Add your frontend URL
+    origin: ['http://localhost:8080', 'https://localhost:8080', "https://apiprimemrckdev-production.up.railway.app", "https://prime.mrck.dev"], // Add your frontend URL
     allowMethods: ['POST', 'GET', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
     exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
