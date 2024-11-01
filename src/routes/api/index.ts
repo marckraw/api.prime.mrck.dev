@@ -2,6 +2,7 @@ import {Hono} from "hono";
 import { bearerAuth } from 'hono/bearer-auth'
 import chatRouter from "./chat/chat";
 import taskRouter from "./tasks/tasks";
+import aiDevs from "./ai_devs/aiDevs";
 import {config} from "../../config.env";
 import { cors } from 'hono/cors'
 
@@ -22,6 +23,7 @@ apiRouter.use('/*', bearerAuth({token}))
 
 apiRouter.route('/chat', chatRouter)
 apiRouter.route('/tasks', taskRouter)
+apiRouter.route('/ai_devs', aiDevs)
 apiRouter.get('/resource', (c) => c.json({ message: 'Protected resource' }))
 
 export default apiRouter
