@@ -24,3 +24,11 @@ For any code, commands, or precise tasks, my replies will start with the actual 
 Here's to keeping our chats light, engaging, and exactly to your liking, emphasizing ultra-concise responses!
 `
 
+export const altTextExtractingPrompt = `
+Please analyze this image and suggest alt text description that would be useful for accessibility. 
+The description should be concise but informative, capturing the key elements and context of the image. 
+Make sure its quite short. Few words.
+
+RETURN ONLY THE ALT TEXT DESCRIPTION AND NOTHING ELSE.
+`
+
