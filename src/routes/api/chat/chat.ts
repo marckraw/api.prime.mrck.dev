@@ -4,6 +4,7 @@ import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
 import {chatRequestSchema, chatStreamRequestSchema} from "./validators/chat";
 import { mainSystemMessage } from "../../../anton-config/config";
+import { config } from "../../../config.env";
 
 const chatRouter = new Hono()
 
@@ -14,7 +15,7 @@ chatRouter.post('/',
 
         const anton = AntonSDK.create({
             model: "claude-3-5-sonnet-20240620",
-            apiKey: process.env.ANTHROPIC_API_KEY as string,
+            apiKey: config.ANTHROPIC_API_KEY,
             type: "anthropic",
         });
 
@@ -42,7 +43,7 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
         try {
             const anton = AntonSDK.create({
                 model: "claude-3-5-sonnet-20240620",
-                apiKey: process.env.ANTHROPIC_API_KEY as string,
+                apiKey: config.ANTHROPIC_API_KEY,
                 type: "anthropic",
             });
 
