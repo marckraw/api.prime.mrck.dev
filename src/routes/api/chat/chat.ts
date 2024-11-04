@@ -3,6 +3,7 @@ import {streamText, stream} from 'hono/streaming'
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
 import {chatRequestSchema, chatStreamRequestSchema} from "./validators/chat";
+import { mainSystemMessage } from "../../../anton-config/config";
 
 const chatRouter = new Hono()
 
@@ -16,6 +17,14 @@ chatRouter.post('/',
             apiKey: process.env.ANTHROPIC_API_KEY as string,
             type: "anthropic",
         });
+
+        if (anton) {
+            if (requestData.systemMessage) {
+                anton.setSystemMessage?.(requestData.systemMessage)
+            } else {
+                anton.setSystemMessage?.(mainSystemMessage)
+            }
+        }
 
         const response = await anton.chat({
             messages: requestData.messages,
@@ -36,6 +45,15 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
                 apiKey: process.env.ANTHROPIC_API_KEY as string,
                 type: "anthropic",
             });
+
+
+            if (anton) {
+                if (requestData.systemMessage) {
+                    anton.setSystemMessage?.(requestData.systemMessage)
+                } else {
+                    anton.setSystemMessage?.(mainSystemMessage)
+                }
+            }
             const message = await anton.chat({
                 messages: requestData.messages,
                 stream: true

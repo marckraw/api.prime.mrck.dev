@@ -9,6 +9,7 @@ export const chatRequestSchema = z
             })
                 .strict()
         ),
+        systemMessage: z.string().optional(),
     })
     .strict();
 
