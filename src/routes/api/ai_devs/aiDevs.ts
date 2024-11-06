@@ -49,6 +49,85 @@ aiDevs.get('/0-1',
     }
 )
 
+aiDevs.get('/1-1',
+    async (c) => {
+        const response = await fetch(process.env.AI_DEVS_SYSTEM_ROBOTOW_URL as string);
+        const html = await response.text();
+        
+        // Using regex to parse HTML since we're in an edge environment
+        // where DOM parsing libraries may not be available
+        const idPattern = /<[^>]*id="([^"]*)"[^>]*>(.*?)<\/[^>]*>/g;
+        const matches = [...html.matchAll(idPattern)];
+        
+        const contentById: Record<string, string[]> = {};
+        matches.forEach(match => {
+            const id = match[1];
+            const fullContent = match[2].trim();
+            if (!contentById[id]) {
+                contentById[id] = [];
+            }
+            if (fullContent) {
+                contentById[id].push(fullContent);
+            }
+        });
+
+        const question = contentById['human-question'];
+        
+        const anton = AntonSDK.create({
+            model: "claude-3-5-sonnet-20240620",
+            apiKey: process.env.ANTHROPIC_API_KEY as string,
+            type: "anthropic",
+        });
+
+        const answerResponse: any = await anton.chat({
+            messages: [
+                {
+                    role: "assistant",
+                    content: "You are a helpful assistant that can answer questions and help with tasks. Your answers are conscise and to the point, without any additional information.",
+                },
+                {
+                    role: "user",
+                    content: question[0]
+                }
+            ],
+        });
+
+        const answer = answerResponse[0].content;
+
+        console.log(process.env.AI_DEVS_SYSTEM_ROBOTOW_URL)
+
+        console.log("To send: ")
+        console.log({
+            login: process.env.AI_DEVS_SYSTEM_ROBOTOW_URL_LOGIN as string,
+            password: process.env.AI_DEVS_SYSTEM_ROBOTOW_URL_PASSWORD as string,
+            answer
+        })
+
+        const formData = new URLSearchParams();
+        formData.append('username', process.env.AI_DEVS_SYSTEM_ROBOTOW_URL_LOGIN as string);
+        formData.append('password', process.env.AI_DEVS_SYSTEM_ROBOTOW_URL_PASSWORD as string);
+        formData.append('answer', answer);
+
+        const loginToSite = await fetch(process.env.AI_DEVS_SYSTEM_ROBOTOW_URL as string, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData,
+        });
+
+        const finalAnswer = await loginToSite.text();
+        console.log(finalAnswer);
+
+        // Parse HTML string to find href attributes using regex
+        const hrefPattern = /href=["']([^"']+)["']/g;
+        const hrefMatches = [...finalAnswer.matchAll(hrefPattern)];
+        const finalHref = hrefMatches.map(match => match[1]).find(match => match.includes("files"));
+
+        return c.json({response: {question, answer, finalUrl: `${process.env.AI_DEVS_SYSTEM_ROBOTOW_URL as string + finalHref}`}});
+    }
+)
+
 
 
 export default aiDevs

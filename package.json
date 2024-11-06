@@ -13,6 +13,7 @@
     "hono-pino": "^0.3.0",
     "pino": "^9.5.0",
     "pino-pretty": "^11.3.0",
+    "sb-mig": "^5.4.1",
     "zod": "^3.23.8"
   },
   "devDependencies": {
