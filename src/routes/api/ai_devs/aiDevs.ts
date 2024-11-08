@@ -2,7 +2,7 @@ import {Hono} from "hono";
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
 import {aiDevsExampleSchema} from "./validators/aiDevs";
-import { POLIGON_API_KEY, POLIGON_API_URL } from "./constants";
+import { AI_DEVS_XYZ_COMPANY_VERIFY_URL, POLIGON_API_KEY, POLIGON_API_URL } from "./constants";
 import { POLIGON_API_VERIFY_URL } from "./constants";
 
 const aiDevs = new Hono()
@@ -125,6 +125,101 @@ aiDevs.get('/1-1',
         const finalHref = hrefMatches.map(match => match[1]).find(match => match.includes("files"));
 
         return c.json({response: {question, answer, finalUrl: `${process.env.AI_DEVS_SYSTEM_ROBOTOW_URL as string + finalHref}`}});
+    }
+)
+
+aiDevs.get('/1-2',
+    async (c) => {
+        const startMsgID = 0;
+        const body = {
+            "msgID": startMsgID,
+            "text": "READY"
+        }
+
+        const robotInstructions = await fetch("https://xyz.ag3nts.org/files/0_13_4b.txt");
+        const robotInstructionsText = await robotInstructions.text();
+
+        let verificationResponse = await fetch(AI_DEVS_XYZ_COMPANY_VERIFY_URL, {
+            method: 'POST',
+            body: JSON.stringify(body),
+        });
+
+        const verificationResponseJson = await verificationResponse.json();
+
+        const conversationId = verificationResponseJson.msgID;
+
+        console.log("This is the response and question: ", verificationResponseJson)
+
+
+        const anton = AntonSDK.create({
+            model: "claude-3-5-sonnet-20240620",
+            apiKey: process.env.ANTHROPIC_API_KEY as string,
+            type: "anthropic",
+        });
+
+        if(!anton) {
+            return c.json({response: {error: "Something went wrong while creating Anton SDK instance"}}, 500);
+        }
+
+        anton.setSystemMessage?.(robotInstructionsText)
+
+
+        const incorrectPieces = await anton.chat({
+            messages: [
+                {
+                    role: "user",
+                    content: "Given your system message find intentionally incorrect pieces of information and return them in a list."
+                }
+            ]
+        })
+        
+
+        anton.setSystemMessage?.(`
+            Here is the list of intentionally incorrect pieces of information:
+            ${incorrectPieces[0].content}
+            You will be using them to answer some questions.
+            Remember to always speak in english, never in any other language.
+            Return always just an answer and nothing more.
+            Be concise and straight forward.
+            `)
+
+        const antonResponse = await anton.chat({
+            messages: [
+                {
+                    role: "user",
+                    content: `
+                    Answer the question:
+                    <question>
+                    ${verificationResponseJson.text}
+                    </question>
+                    `
+                }
+            ]
+        })
+
+        if(!antonResponse) {
+            return c.json({response: {error: "Something went wrong while creating Anton SDK instance"}}, 500);
+        }
+
+        console.log("ANSWER: ")
+        console.log(antonResponse)
+
+
+        const response = await fetch(AI_DEVS_XYZ_COMPANY_VERIFY_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                msgID: conversationId,
+                text: antonResponse[0].content
+            }),
+        })
+
+        const finalResponse = await response.json();
+
+        console.log("This is the final response: ", finalResponse)
+
+
+
+        return c.json({response: finalResponse});
     }
 )
 
