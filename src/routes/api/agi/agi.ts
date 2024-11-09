@@ -52,10 +52,16 @@ agiRouter.post('/',
             }))
         );
 
+        // const anton = AntonSDK.create({
+        //     model: "claude-3-5-sonnet-20240620",
+        //     apiKey: config.ANTHROPIC_API_KEY,
+        //     type: "anthropic",
+        // });
+
         const anton = AntonSDK.create({
-            model: "claude-3-5-sonnet-20240620",
-            apiKey: config.ANTHROPIC_API_KEY,
-            type: "anthropic",
+            model: "gpt-4o",
+            apiKey: config.OPENAI_API_KEY,
+            type: "openai",
         });
 
         if (anton) {
@@ -75,18 +81,27 @@ agiRouter.post('/',
             ...requestData.messages
         ];
 
-        const response = await anton.chat({
-            messages: allMessages,
-        });
+        try {
+            const response = await anton.chat({
+                messages: allMessages,
+            });
 
-        // Save the assistant's response
-        await db.insert(messages).values({
-            conversationId: conversation.id,
-            role: 'assistant',
-            content: (response as any)[0].content,
-        });
+            // Save the assistant's response
+            await db.insert(messages).values({
+                conversationId: conversation.id,
+                role: 'assistant',
+                content: (response as any)[0].content,
+            });
 
-        return c.json({response});
+            return c.json({
+                conversationId: conversation.id,
+                data: {
+                    messages: response
+                }
+            })
+        } catch (error) {
+            return c.json({ error: {message: (error as any).message, code: (error as any).code} }, (error as any).status || 500);
+        }
     }
 )
 
