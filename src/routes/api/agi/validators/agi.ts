@@ -9,6 +9,7 @@ export const agiRequestSchema = z
             })
                 .strict()
         ),
+        conversationId: z.string().optional(),
         systemMessage: z.string().optional(),
     })
     .strict();
