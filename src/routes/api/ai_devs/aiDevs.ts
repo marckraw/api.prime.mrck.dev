@@ -2,8 +2,10 @@ import {Hono} from "hono";
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
 import {aiDevsExampleSchema} from "./validators/aiDevs";
-import { AI_DEVS_XYZ_COMPANY_VERIFY_URL, POLIGON_API_KEY, POLIGON_API_URL } from "./constants";
+import { AI_DEVS_API_KEY, AI_DEVS_XYZ_COMPANY_VERIFY_URL, POLIGON_API_KEY, POLIGON_API_URL } from "./constants";
 import { POLIGON_API_VERIFY_URL } from "./constants";
+import { checkCalculationsErrors } from "./helper";
+import { findAndAnswerQuestions } from "./helper";
 
 const aiDevs = new Hono()
 
@@ -39,8 +41,7 @@ aiDevs.get('/0-1',
                 task: "POLIGON",
                 apikey: POLIGON_API_KEY,
                 answer
-            }
-            ),
+            }),
         });
 
         const responseFromPoligonApiJson = await responseFromPoligonApi.json();
@@ -222,6 +223,71 @@ aiDevs.get('/1-2',
         return c.json({response: finalResponse});
     }
 )
+
+aiDevs.get('/1-3',
+    async (c) => {
+        const response = await fetch(`https://centrala.ag3nts.org/data/${process.env.AI_DEVS_API_KEY}/json.txt`)
+        const responseJson = await response.json();
+
+        let data = await findAndAnswerQuestions(responseJson)
+        data = checkCalculationsErrors(data)
+        data = {
+            ...data,
+            apikey: AI_DEVS_API_KEY
+        }
+
+        const finalResponse = await fetch(`https://centrala.ag3nts.org/report`, {
+            method: 'POST',
+            body: JSON.stringify({
+                task: "JSON",
+                apikey: AI_DEVS_API_KEY,
+                answer: data
+            }),
+        })
+
+        const finalResponseJson = await finalResponse.json();
+
+        return c.json({response: finalResponseJson});
+    }
+)
+
+aiDevs.get('/1-4',
+    async (c) => {
+        const myFinalPromptForRobot = `
+        - You are the robot that can move UP, DOWN, RIGHT, LEFT
+        - Your job is to return a JSON with list of steps in steps key, comma separated to reach the finish place.
+        - map is represented as 2 dimensional array
+        - example of 1 step:
+        moving UP from the initial position is changing your position ([3,0]) to position: ([2, 0])
+        <MAP>
+        [
+        [ROAD,WALL,ROAD,ROAD,ROAD,ROAD],
+        [ROAD,ROAD,ROAD,WALL,ROAD,ROAD],
+        [ROAD,WALL,ROAD,WALL,ROAD,ROAD],
+        [YOU,WALL,ROAD,ROAD,ROAD,FINISH]
+        ]
+        </MAP>
+
+        <LEGEND>
+        ROAD - Space where you can step in
+        WALL - wall, avoid stepping on it at all cost!
+        FINISH - Finish position
+        YOU - You
+        </LEGEND>
+
+        <thinking>your's thinking</thinking>
+        <RESULT>
+        {
+        steps: "UP, RIGHT, etc..."
+        }
+        </RESULT>
+        `
+        return c.json({response: myFinalPromptForRobot});
+    }
+)
+
+
+
 
 
 

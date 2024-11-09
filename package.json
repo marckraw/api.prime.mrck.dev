@@ -7,10 +7,12 @@
   "dependencies": {
     "@hono/node-server": "^1.13.2",
     "@hono/zod-validator": "^0.4.1",
+    "@mendable/firecrawl-js": "^1.7.2",
     "@mrck-labs/anton-sdk": "^1.1.1",
     "dotenv": "^16.4.5",
     "hono": "^4.6.4",
     "hono-pino": "^0.3.0",
+    "openai": "^4.71.1",
     "pino": "^9.5.0",
     "pino-pretty": "^11.3.0",
     "sb-mig": "^5.4.1",
