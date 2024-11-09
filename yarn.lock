@@ -413,19 +413,19 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.23.0"
 
-"@mrck-labs/anton-sdk@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@mrck-labs/anton-sdk/-/anton-sdk-1.1.1.tgz#05eb95d4df6573ead7bb352d48228c931ae025b0"
-  integrity sha512-TgxJcEabRM1sgJJJhHUYMSIS0JJuAuMBDndF6imDYRYW6KCZ3yEiBlPZBAOE1oW830a33QHm6oa489O6Clugeg==
+"@mrck-labs/anton-sdk@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@mrck-labs/anton-sdk/-/anton-sdk-1.2.0.tgz#232952fe73308a67a759d6e0f74fbe3c5c0fc86a"
+  integrity sha512-hawS5GZwX9DUM1BZm2o5mp62OviMQ2Is2/6MIAbY0HCFce4knt5inS5NTdKEfTVWbgY/nec8HECKKgK1LgMtNQ==
   dependencies:
-    "@mrck-labs/api-interface" "^1.1.1"
+    "@mrck-labs/api-interface" "^1.2.0"
     "@mrck-labs/utils" "2.0.1"
     axios "^1.7.3"
 
-"@mrck-labs/api-interface@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@mrck-labs/api-interface/-/api-interface-1.1.1.tgz#d0c10fc855949099106a7acd641e85f22d205bab"
-  integrity sha512-a6uSeApSmr1ZhWyZx04d1e/CbB6iJf9r/mesRAX7ShnaGQ9EnC7iSWf65SVJ/r3hOx5Ww0qOJHt98JQhPZWIfg==
+"@mrck-labs/api-interface@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@mrck-labs/api-interface/-/api-interface-1.2.0.tgz#9f645b7f0b507f2cfc80704ed96383a54cc40130"
+  integrity sha512-9Is4PgAaNszPZ4Tl+vdDsRIOxJC11CHXjLlfGgSFYNfwoJJY6CWMXXY58Zj2Vy2tDRWOV+UFJbKHFWF3fjS/zA==
   dependencies:
     "@mrck-labs/utils" "*"
 
