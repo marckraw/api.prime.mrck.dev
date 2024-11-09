@@ -106,13 +106,15 @@ agiRouter.post('/',
                 content: (response as any)[0].content,
             });
 
+
             return c.json({
-                // Fix types here
-                ...(requestData.debug && (anton as any).debug ? (anton as any).debug() : {}),
                 conversationId: conversation.id,
                 data: {
                     messages: response
-                }
+                },
+                ...(requestData.debug ? {
+                    debug: anton.debug(),
+                } : {}),
             })
         } catch (error) {
             return c.json({ error: {message: (error as any).message, code: (error as any).code} }, (error as any).status || 500);
