@@ -8,24 +8,62 @@ import { altTextExtractingPrompt } from '../../../anton-config/config'
 const imageRouter = new Hono()
 
 
-async function getImageAsBase64(imageUrl: string): Promise<string> {
+export const getImageAsBase64 = async (imageUrl: string): Promise<string> => {
     const response = await fetch(imageUrl)
     const arrayBuffer = await response.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
     return buffer.toString('base64')
   }
 
+  const imageContent = async ({imageUrl, company}: {imageUrl: string, company: string}) => {
+    if (company === "openai") {
+      return {
+        "type": "image_url",
+        "image_url": {
+          "url": imageUrl
+        }
+      }
+    } else if (company === "anthropic") {
+      const convertedBase64Image = await getImageAsBase64(imageUrl as string)
+      return {
+        type: "image",
+        source: {
+          type: "base64",
+          media_type: "image/jpeg",
+          data: convertedBase64Image,
+        },
+      }
+    }
+  }
+
 imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) => {
   try {
-    const { imageUrl } = await c.req.valid('json')    
+    const { imageUrl, model, debug } = await c.req.valid('json')    
 
-    const convertedBase64Image = await getImageAsBase64(imageUrl as string)
+    let anton;
+    if(model) {
+      if(model.company === "anthropic") {
+          anton = AntonSDK.create({
+              model: model.model as any,
+              apiKey: config.ANTHROPIC_API_KEY,
+              type: "anthropic",
+          });
+      } else {
+          anton = AntonSDK.create({
+              model: model.model as any,
+              apiKey: config.OPENAI_API_KEY,
+              type: "openai",
+          });
+      }
+  } else {
+      anton = AntonSDK.create({
+          model: "gpt-4o-mini",
+          apiKey: config.OPENAI_API_KEY,
+          type: "openai",
+      });
+  }
 
-    const anton = AntonSDK.create({
-        model: "claude-3-5-sonnet-20240620",
-        apiKey: config.ANTHROPIC_API_KEY,
-        type: "anthropic",
-    });
+  const imageContentData = await imageContent({imageUrl, company: model?.company || "openai"})
 
     const response = await anton.chat({
         messages: [
@@ -33,14 +71,7 @@ imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) =
               role: "user",
               // @ts-ignore
               content: [
-                {
-                    type: "image",
-                    source: {
-                        type: "base64",
-                        media_type: "image/jpeg",
-                        data: convertedBase64Image,
-                    },
-                },
+                imageContentData,
                 {
                   type: "text",
                   text: altTextExtractingPrompt
@@ -51,7 +82,10 @@ imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) =
     });
     
     return c.json({
-      suggestedAltText: (response as any)[0].content
+      suggestedAltText: (response as any)[0].content,
+      ...(debug ? {
+        debug: anton.debug(),
+    } : {})
     })
 
   } catch (error) {
