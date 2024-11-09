@@ -52,17 +52,30 @@ agiRouter.post('/',
             }))
         );
 
-        // const anton = AntonSDK.create({
-        //     model: "claude-3-5-sonnet-20240620",
-        //     apiKey: config.ANTHROPIC_API_KEY,
-        //     type: "anthropic",
-        // });
 
-        const anton = AntonSDK.create({
-            model: "gpt-4o",
-            apiKey: config.OPENAI_API_KEY,
-            type: "openai",
-        });
+        let anton;
+        if(requestData.model) {
+            if(requestData.model.company === "anthropic") {
+                anton = AntonSDK.create({
+                    model: requestData.model.model as any,
+                    apiKey: config.ANTHROPIC_API_KEY,
+                    type: "anthropic",
+                });
+            } else {
+                anton = AntonSDK.create({
+                    model: requestData.model.model as any,
+                    apiKey: config.OPENAI_API_KEY,
+                    type: "openai",
+                });
+            }
+        } else {
+            anton = AntonSDK.create({
+                model: "gpt-4o",
+                apiKey: config.OPENAI_API_KEY,
+                type: "openai",
+            });
+        }
+
 
         if (anton) {
             if (requestData.systemMessage) {
@@ -94,6 +107,8 @@ agiRouter.post('/',
             });
 
             return c.json({
+                // Fix types here
+                ...(requestData.debug && (anton as any).debug ? (anton as any).debug() : {}),
                 conversationId: conversation.id,
                 data: {
                     messages: response
