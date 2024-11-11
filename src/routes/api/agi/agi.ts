@@ -114,6 +114,7 @@ agiRouter.post('/',
                 },
                 ...(requestData.debug ? {
                     debug: anton.debug(),
+                    channel: requestData.channel
                 } : {}),
             })
         } catch (error) {

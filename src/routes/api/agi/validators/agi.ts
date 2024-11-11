@@ -14,6 +14,7 @@ export const agiRequestSchema = z
             model: z.string(),
         }).optional(),
         debug: z.boolean().optional(),
+        channel: z.string().optional(),
         conversationId: z.string().optional(),
         systemMessage: z.string().optional(),
     })
