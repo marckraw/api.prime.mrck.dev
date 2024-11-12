@@ -1,14 +1,13 @@
 import {Hono} from "hono";
-import {streamText, stream} from 'hono/streaming'
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
-import {agiRequestSchema, agiStreamRequestSchema} from "./validators/agi";
+import {agiRequestSchema} from "./validators/agi";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
 import { conversations, messages } from "../../../db/schema/conversations";
 import { db } from "../../../db";
 import { eq } from "drizzle-orm";
-import { intentionValidationPrompt } from "./prompts/intentionValidationPrompts";
+import { IntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
 
 const agiRouter = new Hono()
 
@@ -21,17 +20,11 @@ agiRouter.post('/',
         let intentionValidationResponse;
 
         if(requestData.intention !== 'conversation') {
-            const intentionValidator = AntonSDK.create({
-                model: "gpt-4o",
-                apiKey: config.OPENAI_API_KEY,
-                type: "openai",
-            });
-
-            intentionValidator.setSystemMessage?.(intentionValidationPrompt())
+            const intentionValidator = new IntentionValidator()
 
             
             try {
-                intentionValidationResponse = await intentionValidator.chat({
+                intentionValidationResponse = await intentionValidator.validateAndClassify({
                     messages: requestData.messages,
                 })
 
