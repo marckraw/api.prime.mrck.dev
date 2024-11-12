@@ -2,6 +2,7 @@ import {z} from "zod";
 
 export const agiRequestSchema = z
     .object({
+        intention: z.string().optional(),
         messages: z.array(
             z.object({
                 role: z.enum(["user", "system", "assistant"]),

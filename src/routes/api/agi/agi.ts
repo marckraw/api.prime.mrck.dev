@@ -17,26 +17,28 @@ agiRouter.post('/',
     async (c) => {
         const requestData = c.req.valid('json');
 
-        const intentionValidator = AntonSDK.create({
-            model: "gpt-4o",
-            apiKey: config.OPENAI_API_KEY,
-            type: "openai",
-        });
+        if(requestData.intention !== 'conversation') {
+            const intentionValidator = AntonSDK.create({
+                model: "gpt-4o",
+                apiKey: config.OPENAI_API_KEY,
+                type: "openai",
+            });
 
-        intentionValidator.setSystemMessage?.(intentionValidationPrompt())
+            intentionValidator.setSystemMessage?.(intentionValidationPrompt())
 
-        let parsedIntentionValidationResponse;
-        let intentionValidationResponse;
-        try {
-            intentionValidationResponse = await intentionValidator.chat({
-                messages: requestData.messages,
-            })
+            let parsedIntentionValidationResponse;
+            let intentionValidationResponse;
+            try {
+                intentionValidationResponse = await intentionValidator.chat({
+                    messages: requestData.messages,
+                })
 
-            parsedIntentionValidationResponse = JSON.parse((intentionValidationResponse as any)[0].content)
+                parsedIntentionValidationResponse = JSON.parse((intentionValidationResponse as any)[0].content)
 
-        } catch (error) {
-            parsedIntentionValidationResponse = (intentionValidationResponse as any)[0].content
-        }
+            } catch (error) {
+                parsedIntentionValidationResponse = (intentionValidationResponse as any)[0].content
+            }
+    }
         
 
         let conversation;
