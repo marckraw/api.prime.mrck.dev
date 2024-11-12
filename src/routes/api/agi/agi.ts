@@ -17,6 +17,9 @@ agiRouter.post('/',
     async (c) => {
         const requestData = c.req.valid('json');
 
+        let parsedIntentionValidationResponse;
+        let intentionValidationResponse;
+
         if(requestData.intention !== 'conversation') {
             const intentionValidator = AntonSDK.create({
                 model: "gpt-4o",
@@ -26,8 +29,7 @@ agiRouter.post('/',
 
             intentionValidator.setSystemMessage?.(intentionValidationPrompt())
 
-            let parsedIntentionValidationResponse;
-            let intentionValidationResponse;
+            
             try {
                 intentionValidationResponse = await intentionValidator.chat({
                     messages: requestData.messages,
@@ -140,7 +142,7 @@ agiRouter.post('/',
                 ...(requestData.debug ? {
                     debug: anton.debug(),
                     channel: requestData.channel,
-                    intentionValidation: parsedIntentionValidationResponse
+                    intentionValidation: parsedIntentionValidationResponse ? parsedIntentionValidationResponse : null
                 } : {}),
             })
         } catch (error) {
