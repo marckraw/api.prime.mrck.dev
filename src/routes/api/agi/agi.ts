@@ -8,6 +8,7 @@ import { config } from "../../../config.env";
 import { conversations, messages } from "../../../db/schema/conversations";
 import { db } from "../../../db";
 import { eq } from "drizzle-orm";
+import { intentionValidationPrompt } from "./prompts/intentionValidationPrompts";
 
 const agiRouter = new Hono()
 
@@ -15,6 +16,19 @@ agiRouter.post('/',
     zValidator('json', agiRequestSchema),
     async (c) => {
         const requestData = c.req.valid('json');
+
+        const intentionValidator = AntonSDK.create({
+            model: "gpt-4o",
+            apiKey: config.OPENAI_API_KEY,
+            type: "openai",
+        });
+
+        intentionValidator.setSystemMessage?.(intentionValidationPrompt())
+
+        const intentionValidationResponse = await intentionValidator.chat({
+            messages: requestData.messages,
+        })
+        
 
         let conversation;
         let existingMessages: any[] = [];
@@ -114,7 +128,8 @@ agiRouter.post('/',
                 },
                 ...(requestData.debug ? {
                     debug: anton.debug(),
-                    channel: requestData.channel
+                    channel: requestData.channel,
+                    intentionValidation: intentionValidationResponse
                 } : {}),
             })
         } catch (error) {

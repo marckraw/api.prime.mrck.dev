@@ -7,7 +7,6 @@ import { altTextExtractingPrompt } from '../../../anton-config/config'
 
 const imageRouter = new Hono()
 
-
 export const getImageAsBase64 = async (imageUrl: string): Promise<string> => {
     const response = await fetch(imageUrl)
     const arrayBuffer = await response.arrayBuffer()
