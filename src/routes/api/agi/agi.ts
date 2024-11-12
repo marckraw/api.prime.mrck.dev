@@ -25,9 +25,18 @@ agiRouter.post('/',
 
         intentionValidator.setSystemMessage?.(intentionValidationPrompt())
 
-        const intentionValidationResponse = await intentionValidator.chat({
-            messages: requestData.messages,
-        })
+        let parsedIntentionValidationResponse;
+        let intentionValidationResponse;
+        try {
+            intentionValidationResponse = await intentionValidator.chat({
+                messages: requestData.messages,
+            })
+
+            parsedIntentionValidationResponse = JSON.parse((intentionValidationResponse as any)[0].content)
+
+        } catch (error) {
+            parsedIntentionValidationResponse = (intentionValidationResponse as any)[0].content
+        }
         
 
         let conversation;
@@ -129,7 +138,7 @@ agiRouter.post('/',
                 ...(requestData.debug ? {
                     debug: anton.debug(),
                     channel: requestData.channel,
-                    intentionValidation: intentionValidationResponse
+                    intentionValidation: parsedIntentionValidationResponse
                 } : {}),
             })
         } catch (error) {
