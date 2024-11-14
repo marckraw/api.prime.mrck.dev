@@ -27,7 +27,12 @@ Here's to keeping our chats light, engaging, and exactly to your liking, emphasi
 export const altTextExtractingPrompt = `
 Please analyze this image and suggest alt text description that would be useful for accessibility. 
 The description should be concise but informative, capturing the key elements and context of the image. 
-Make sure its quite short. Few words.
+
+Rules of the alt text and best practices:
+- Be specific
+- Keep it descriptive but short
+- Skip redundant phrases like "image of" or "photo of"
+- Use keywords that would be useful for a visually impaired person, but don't overdo it
 
 RETURN ONLY THE ALT TEXT DESCRIPTION AND NOTHING ELSE.
 `
