@@ -11,4 +11,11 @@ export const analyzeImageSchema = z.object({
   message: "ImageUrl must be provided"
 });
 
+export const generateImageSchema = z.object({
+  prompt: z.string(),
+  debug: z.boolean().optional(),
+}).refine((data) => data.prompt, {
+  message: "Prompt must be provided"
+});
+
 export type AnalyzeImageInput = z.infer<typeof analyzeImageSchema> 

@@ -6,7 +6,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "prepare": "relative-deps"
   },
   "dependencies": {
     "@hono/node-server": "^1.13.2",
@@ -28,6 +29,10 @@
   "devDependencies": {
     "@types/node": "^20.11.17",
     "drizzle-kit": "^0.28.0",
+    "relative-deps": "^1.0.7",
     "tsx": "^4.7.1"
+  },
+  "relativeDependencies": {
+    "@mrck-labs/anton-sdk": "../__explorations/monorepos/npm-workspace-course/libs/anton-sdk"
   }
 }

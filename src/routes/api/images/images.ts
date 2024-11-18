@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { analyzeImageSchema } from './validators/images'
+import { analyzeImageSchema, generateImageSchema } from './validators/images'
 import { config } from '../../../config.env'
 import { AntonSDK } from '@mrck-labs/anton-sdk'
 import { altTextExtractingPrompt } from '../../../anton-config/config'
@@ -90,6 +90,34 @@ imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) =
   } catch (error) {
     console.error('Error analyzing image:', error)
     return c.json({ error: 'Failed to analyze image' }, 500)
+  }
+})
+
+imageRouter.post('/generate', zValidator('json', generateImageSchema), async (c) => {
+  try {
+    const { prompt, debug } = await c.req.valid('json')    
+
+    const anton = AntonSDK.create({
+          model: "gpt-4o-mini",
+          apiKey: config.OPENAI_API_KEY,
+          type: "openai",
+      });
+
+    const response = await anton.createImage({
+      prompt,
+      model: 'dall-e-3'
+    })
+    
+    return c.json({
+      response,
+      ...(debug ? {
+        debug: anton.debug(),
+    } : {})
+    })
+
+  } catch (error) {
+    console.error('Error generating image:', error)
+    return c.json({ error: 'Failed to generate image' }, 500)
   }
 })
 
