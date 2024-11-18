@@ -34,6 +34,25 @@ agiRouter.post('/',
                 parsedIntentionValidationResponse = (intentionValidationResponse as any)[0].content
             }
     }
+
+    console.log(parsedIntentionValidationResponse)
+
+    if(parsedIntentionValidationResponse?.intent === 'create') {
+        const anton = AntonSDK.create({
+            model: "gpt-4o",
+            apiKey: config.OPENAI_API_KEY,
+            type: "openai",
+        });
+
+        const response = await anton.createImage({
+            prompt: parsedIntentionValidationResponse.originalMessage,
+            model: 'dall-e-3'
+        })
+
+        console.log(response)
+
+        return c.json({response: response?.data[0].url}, 200)
+    }
         
 
         let conversation;
