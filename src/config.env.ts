@@ -11,6 +11,7 @@ const envSchema = z.object({
     DATABASE_URL: z.string(),
     ANTHROPIC_API_KEY: z.string(),
     OPENAI_API_KEY: z.string(),
+    LEONARDOAI_API_KEY: z.string(),
     X_API_KEY: z.string(),
     LOG_LEVEL: z.string(),
     TODOIST_API_KEY: z.string().default(''),

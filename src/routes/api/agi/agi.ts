@@ -39,24 +39,38 @@ agiRouter.post('/',
 
     if(parsedIntentionValidationResponse?.intent === 'create') {
         const anton = AntonSDK.create({
-            model: "gpt-4o",
+            model: "gpt-4o-mini",
             apiKey: config.OPENAI_API_KEY,
             type: "openai",
+            supportedModelsApiKeys: {
+              leonardoAI: config.LEONARDOAI_API_KEY
+            }
         });
 
-        const response = await anton.createImage({
-            prompt: parsedIntentionValidationResponse.originalMessage,
-            model: 'dall-e-3'
+        const response = await anton.createImageWithLeonardo({
+          prompt: parsedIntentionValidationResponse.originalMessage,
+          alchemy: true,
+          height: 512,
+          modelId: "b24e16ff-06e3-43eb-8d33-4416c2d75876",
+          num_images: 1,
+          // @ts-ignore
+          presetStyle: "DYNAMIC",
+          width: 512
         })
 
+        
+
+        console.log("##############")
         console.log(response)
+        console.log("##############")
 
         return c.json({
             data: {
                  messages: [
                     {
                         role: "assistant",
-                        content: response?.data[0].url
+                        // @ts-ignore
+                        content: response?.imageUrl
                     }
                  ]
             }

@@ -83,10 +83,10 @@
     zod "^3.23.8"
     zod-to-json-schema "^3.23.0"
 
-"@mrck-labs/anton-sdk@^1.2.1":
-  version "1.2.1"
-  resolved "https://registry.npmjs.org/@mrck-labs/anton-sdk/-/anton-sdk-1.2.1.tgz"
-  integrity sha512-O7a3dOMjr/Ido1EB8a+TYedH8x/1XI1M/70zpOhqkpbhnTvEaHgKAmrOcbcFJjssBufxXaCtY+5Tq5yC0j3z8A==
+"@mrck-labs/anton-sdk@^1.2.2":
+  version "1.2.2"
+  resolved "https://registry.npmjs.org/@mrck-labs/anton-sdk/-/anton-sdk-1.2.2.tgz"
+  integrity sha512-e/qm9RWKBacep9FJdpxr1VWAnMuLFL601qyu7dxtqeVcNR19IgPDYBUHty6xdgpYkTKOrwORek5ks8feF2ybJA==
   dependencies:
     "@mrck-labs/api-interface" "^1.2.1"
     "@mrck-labs/utils" "2.0.1"

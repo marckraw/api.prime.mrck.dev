@@ -95,18 +95,36 @@ imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) =
 
 imageRouter.post('/generate', zValidator('json', generateImageSchema), async (c) => {
   try {
-    const { prompt, debug } = await c.req.valid('json')    
+    const { prompt, model = "dall-e-3", debug } = await c.req.valid('json')    
 
     const anton = AntonSDK.create({
           model: "gpt-4o-mini",
           apiKey: config.OPENAI_API_KEY,
           type: "openai",
+          supportedModelsApiKeys: {
+            leonardoAI: config.LEONARDOAI_API_KEY
+          }
       });
 
-    const response = await anton.createImage({
-      prompt,
-      model: 'dall-e-3'
-    })
+
+      let response;
+      if(model === "leonardoai") {
+        response = await anton.createImageWithLeonardo({
+          prompt,
+          alchemy: true,
+          height: 512,
+          modelId: "b24e16ff-06e3-43eb-8d33-4416c2d75876",
+          num_images: 1,
+          // @ts-ignore
+          presetStyle: "DYNAMIC",
+          width: 512
+        })
+      } else {
+        response = await anton.createImage({
+          prompt,
+          model: 'dall-e-3'
+        })
+      }
     
     return c.json({
       response,

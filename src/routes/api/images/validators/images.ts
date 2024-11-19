@@ -13,6 +13,7 @@ export const analyzeImageSchema = z.object({
 
 export const generateImageSchema = z.object({
   prompt: z.string(),
+  model: z.enum(["dall-e-3", "leonardoai"]).optional(),
   debug: z.boolean().optional(),
 }).refine((data) => data.prompt, {
   message: "Prompt must be provided"
