@@ -113,10 +113,10 @@ imageRouter.post('/generate', zValidator('json', generateImageSchema), async (c)
           prompt,
           alchemy: true,
           height: 512,
-          modelId: "b24e16ff-06e3-43eb-8d33-4416c2d75876",
+          modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042", // leonardo phoenix
           num_images: 1,
           // @ts-ignore
-          presetStyle: "DYNAMIC",
+          presetStyle: "CINEMATIC",
           width: 512
         })
       } else {
