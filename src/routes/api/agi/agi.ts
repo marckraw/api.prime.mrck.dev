@@ -1,7 +1,7 @@
 import {Hono} from "hono";
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
-import {agiRequestSchema} from "./validators/agi";
+import {agiRequestSchema, AgiResponse} from "./validators/agi";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
 import { conversations, messages } from "../../../db/schema/conversations";
@@ -51,7 +51,16 @@ agiRouter.post('/',
 
         console.log(response)
 
-        return c.json({response: response?.data[0].url}, 200)
+        return c.json({
+            data: {
+                 messages: [
+                    {
+                        role: "assistant",
+                        content: response?.data[0].url
+                    }
+                 ]
+            }
+        } as AgiResponse, 200)
     }
         
 

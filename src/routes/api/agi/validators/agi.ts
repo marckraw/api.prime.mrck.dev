@@ -21,4 +21,21 @@ export const agiRequestSchema = z
     })
     .strict();
 
+export const agiResponseSchema = z
+    .object({
+        intention: z.string().optional(),
+        data: z.object({
+            messages: z.array(
+                z.object({
+                    role: z.enum(["user", "system", "assistant"]),
+                    content: z.string(),
+                })
+                    .strict()
+            )
+        })
+    })
+    .strict();
+
+export type AgiResponse = z.infer<typeof agiResponseSchema>;
+
 export const agiStreamRequestSchema = agiRequestSchema
