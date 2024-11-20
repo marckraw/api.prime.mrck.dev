@@ -62,13 +62,14 @@ agiRouter.post('/',
 
       const improvedPrompt = (improvedPromptResponse as any)[0].content
 
+
         const response = await anton.createImageWithLeonardo({
                 // @ts-ignore
                 negative_prompt: "",
                 nsfw: true,
                 num_images: 1,
-                width: 1344,
-                height: 2016,
+                width: 1280,
+                height: 1920,
                 num_inference_steps: 10,
                 contrast: 3.5,
                 guidance_scale: 15,
