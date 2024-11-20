@@ -2,7 +2,6 @@ import {z} from "zod";
 
 export const agiRequestSchema = z
     .object({
-        intention: z.string().optional(),
         messages: z.array(
             z.object({
                 role: z.enum(["user", "system", "assistant"]),
@@ -36,6 +35,7 @@ export const agiResponseSchema = z
     })
     .strict();
 
+export type AgiRequest = z.infer<typeof agiRequestSchema>;
 export type AgiResponse = z.infer<typeof agiResponseSchema>;
 
 export const agiStreamRequestSchema = agiRequestSchema

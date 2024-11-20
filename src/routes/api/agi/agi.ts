@@ -1,7 +1,7 @@
 import {Hono} from "hono";
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
-import {agiRequestSchema, AgiResponse} from "./validators/agi";
+import {AgiRequest, agiRequestSchema, AgiResponse} from "./validators/agi";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
 import { conversations, messages } from "../../../db/schema/conversations";
@@ -10,55 +10,54 @@ import { eq } from "drizzle-orm";
 import { IntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
 import { improvePromptPrompt } from "../images/prompts";
 
+
+const validateIntention = async (requestData: AgiRequest): Promise<any> => {
+    const intentionValidator = new IntentionValidator()
+        
+    try {
+        const intentionValidationResponse = await intentionValidator.validateAndClassify({
+            messages: requestData.messages,
+        })
+
+        const parsedIntentionValidationResponse = JSON.parse((intentionValidationResponse as any)[0].content)
+
+        return parsedIntentionValidationResponse
+
+    } catch (error) {
+        console.log("Error in validationIntention")
+        console.log(error)
+    }
+}
+
 const agiRouter = new Hono()
 
 agiRouter.post('/',
     zValidator('json', agiRequestSchema),
     async (c) => {
         const requestData = c.req.valid('json');
+        const parsedIntentionValidationResponse = await validateIntention(requestData)
 
-        let parsedIntentionValidationResponse;
-        let intentionValidationResponse;
-
-        if(requestData.intention !== 'conversation') {
-            const intentionValidator = new IntentionValidator()
-
-            
-            try {
-                intentionValidationResponse = await intentionValidator.validateAndClassify({
-                    messages: requestData.messages,
-                })
-
-                parsedIntentionValidationResponse = JSON.parse((intentionValidationResponse as any)[0].content)
-
-            } catch (error) {
-                parsedIntentionValidationResponse = (intentionValidationResponse as any)[0].content
-            }
-    }
-
-    console.log(parsedIntentionValidationResponse)
-
-    if(parsedIntentionValidationResponse?.intent === 'create') {
-        const anton = AntonSDK.create({
-            model: "gpt-4o-mini",
-            apiKey: config.OPENAI_API_KEY,
-            type: "openai",
-            supportedModelsApiKeys: {
-              leonardoAI: config.LEONARDOAI_API_KEY
-            }
-        });
+        if(parsedIntentionValidationResponse?.intent === 'create') {
+            const anton = AntonSDK.create({
+                model: "gpt-4o-mini",
+                apiKey: config.OPENAI_API_KEY,
+                type: "openai",
+                supportedModelsApiKeys: {
+                leonardoAI: config.LEONARDOAI_API_KEY
+                }
+            });
 
 
-        anton.setSystemMessage?.(improvePromptPrompt)
+            anton.setSystemMessage?.(improvePromptPrompt)
 
-        const improvedPromptResponse = await anton.chat({
-            messages: [
-            {
-                role: "user",
-                content: parsedIntentionValidationResponse.originalMessage
-            }
-            ]
-        })
+            const improvedPromptResponse = await anton.chat({
+                messages: [
+                {
+                    role: "user",
+                    content: parsedIntentionValidationResponse.originalMessage
+                }
+                ]
+            })
 
       const improvedPrompt = (improvedPromptResponse as any)[0].content
 
