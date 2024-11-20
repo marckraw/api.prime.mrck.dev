@@ -19,4 +19,11 @@ export const generateImageSchema = z.object({
   message: "Prompt must be provided"
 });
 
+export const improvePromptSchema = z.object({
+  prompt: z.string(),
+  debug: z.boolean().optional(),
+}).refine((data) => data.prompt, {
+  message: "Prompt must be provided"
+});
+
 export type AnalyzeImageInput = z.infer<typeof analyzeImageSchema> 

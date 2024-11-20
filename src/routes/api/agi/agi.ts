@@ -8,6 +8,7 @@ import { conversations, messages } from "../../../db/schema/conversations";
 import { db } from "../../../db";
 import { eq } from "drizzle-orm";
 import { IntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
+import { improvePromptPrompt } from "../images/prompts";
 
 const agiRouter = new Hono()
 
@@ -47,14 +48,28 @@ agiRouter.post('/',
             }
         });
 
+
+        anton.setSystemMessage?.(improvePromptPrompt)
+
+        const improvedPromptResponse = await anton.chat({
+            messages: [
+            {
+                role: "user",
+                content: parsedIntentionValidationResponse.originalMessage
+            }
+            ]
+        })
+
+      const improvedPrompt = (improvedPromptResponse as any)[0].content
+
         const response = await anton.createImageWithLeonardo({
-          prompt: parsedIntentionValidationResponse.originalMessage,
+          prompt: improvedPrompt,
           alchemy: true,
           height: 512,
           modelId: "b24e16ff-06e3-43eb-8d33-4416c2d75876",
           num_images: 1,
           // @ts-ignore
-          presetStyle: "DYNAMIC",
+          presetStyle: "CINEMATIC",
           width: 512
         })
 

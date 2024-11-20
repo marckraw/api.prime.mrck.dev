@@ -1,9 +1,10 @@
 import { Hono } from 'hono'
 import { zValidator } from '@hono/zod-validator'
-import { analyzeImageSchema, generateImageSchema } from './validators/images'
+import { analyzeImageSchema, generateImageSchema, improvePromptSchema } from './validators/images'
 import { config } from '../../../config.env'
 import { AntonSDK } from '@mrck-labs/anton-sdk'
 import { altTextExtractingPrompt } from '../../../anton-config/config'
+import { improvePromptPrompt } from './prompts'
 
 const imageRouter = new Hono()
 
@@ -138,5 +139,41 @@ imageRouter.post('/generate', zValidator('json', generateImageSchema), async (c)
     return c.json({ error: 'Failed to generate image' }, 500)
   }
 })
+
+imageRouter.post('/improve-prompt', zValidator('json', improvePromptSchema), async (c) => {
+  try {
+    const { prompt, debug } = await c.req.valid('json')    
+
+    const anton = AntonSDK.create({
+          model: "gpt-4o-mini",
+          apiKey: config.OPENAI_API_KEY,
+          type: "openai",
+      });
+
+
+      anton.setSystemMessage?.(improvePromptPrompt)
+
+      const response = await anton.chat({
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ]
+      })
+    
+    return c.json({
+      response,
+      ...(debug ? {
+        debug: anton.debug(),
+    } : {})
+    })
+
+  } catch (error) {
+    console.error('Error generating image:', error)
+    return c.json({ error: 'Failed to generate image' }, 500)
+  }
+})
+
 
 export default imageRouter
