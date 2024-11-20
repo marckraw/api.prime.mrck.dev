@@ -63,14 +63,33 @@ agiRouter.post('/',
       const improvedPrompt = (improvedPromptResponse as any)[0].content
 
         const response = await anton.createImageWithLeonardo({
-          prompt: improvedPrompt,
-          alchemy: true,
-          height: 512,
-          modelId: "b24e16ff-06e3-43eb-8d33-4416c2d75876",
-          num_images: 1,
-          // @ts-ignore
-          presetStyle: "CINEMATIC",
-          width: 512
+                // @ts-ignore
+                negative_prompt: "",
+                nsfw: true,
+                num_images: 1,
+                width: 1344,
+                height: 2016,
+                num_inference_steps: 10,
+                contrast: 3.5,
+                guidance_scale: 15,
+                sd_version: "PHOENIX",
+                modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+                presetStyle: "LEONARDO",
+                scheduler: "LEONARDO",
+                public: false,
+                tiling: false,
+                alchemy: true,
+                highResolution: false,
+                contrastRatio: 0.5,
+                weighting: 0.75,
+                highContrast: false,
+                expandedDomain: false,
+                photoReal: false,
+                transparency: "disabled",
+                styleUUID: "a5632c7c-ddbb-4e2f-ba34-8456ab3ac436",
+                enhancePrompt: false,
+                ultra: false,
+                prompt: improvedPrompt
         })
 
         
