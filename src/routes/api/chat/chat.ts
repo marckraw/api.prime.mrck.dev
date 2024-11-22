@@ -5,6 +5,7 @@ import {zValidator} from "@hono/zod-validator";
 import {chatRequestSchema, chatStreamRequestSchema} from "./validators/chat";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
+import { request } from "http";
 
 const chatRouter = new Hono()
 
@@ -39,13 +40,23 @@ chatRouter.post('/',
 
 chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
     const requestData = c.req.valid('json');
+
     return stream(c, async (stream) => {
         try {
-            const anton = AntonSDK.create({
-                model: "claude-3-5-sonnet-20240620",
-                apiKey: config.ANTHROPIC_API_KEY,
-                type: "anthropic",
-            });
+            let anton;
+            if(requestData.model?.company === "anthropic") {
+                anton = AntonSDK.create({
+                    model: "claude-3-5-sonnet-20240620",
+                    apiKey: config.ANTHROPIC_API_KEY,
+                    type: "anthropic",
+                });
+            } else {
+                anton = AntonSDK.create({
+                    model: requestData?.model?.model as any || 'gpt-4o',
+                    apiKey: config.OPENAI_API_KEY,
+                    type: "openai",
+                });    
+            }
 
 
             if (anton) {
@@ -60,33 +71,39 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
                 stream: true
             })
 
+            let finalText = ""
             for await (const chunk of message) {
                 const text = chunk.toString()
-                // console.log("Chunk: ", text)
-                const lines = text.split('\n').filter(line => line.trim() !== '')
-                console.log("Lines: ", lines)
-                let finalText = ""
-                
+                const lines = text.split('\n').filter((line: string) => line.trim() !== '')
+
                 for (const line of lines) {
                     if (line.startsWith('data: ')) {
+                        if(line.includes("[DONE]")) {
+                            break;
+                        }
+
                         try {
                             const data = JSON.parse(line.slice(6)) as any
 
-                            console.log("##")
-                            console.log(data)
-                            console.log("##")
-                            
-                            switch (data.type) {
-                                case 'content_block_delta':
-                                    finalText += data.delta.text
-                                    // console.log(finalText)
-                                    await stream.write(data.delta.text)
-                                    break
-                                case 'message_start':
-                                case 'content_block_start':
-                                case 'message_stop':
-                                    // Skip these events
-                                    break
+                            if(requestData.model?.company === "anthropic") {
+                                switch (data.type) {
+                                    case 'content_block_delta':
+                                        finalText += data.delta.text
+                                        await stream.write(data.delta.text)
+                                        break
+                                    case 'message_start':
+                                    case 'content_block_start':
+                                    case 'message_stop':
+                                        // Skip these events
+                                        break
+                                }
+                            } else {
+                                if (data.choices[0].delta.content) {
+                                    finalText += data.choices[0].delta.content;
+                                    await stream.write(data.choices[0].delta.content);
+                                } else if (data.choices[0].finish_reason === 'stop') {
+                                    break;
+                                }
                             }
                         } catch (e) {
                             console.error('Failed to parse chunk data:', e)
@@ -94,6 +111,7 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
                     }
                 }
             }
+            console.log("Final streamed text: ", finalText)
             await stream.write('data: [DONE]\n\n')
         } catch (error) {
             // Send error event
@@ -102,16 +120,5 @@ chatRouter.post('/stream', zValidator('json', chatRequestSchema), (c) => {
         await stream.close()
     })
 })
-
-    //   for (let i = 0; i < 10; i++) {
-    //     const message = {
-    //       id: i,
-    //       text: `Message ${i}`,
-    //       timestamp: new Date().toISOString()
-    //     }
-        
-    //     stream.write(`data: ${JSON.stringify(message)}\n\n`)
-    //     await new Promise(resolve => setTimeout(resolve, 1000))
-    //   }
 
 export default chatRouter

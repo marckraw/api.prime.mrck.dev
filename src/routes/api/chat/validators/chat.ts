@@ -9,6 +9,10 @@ export const chatRequestSchema = z
             })
                 .strict()
         ),
+        model: z.object({
+            company: z.enum(["openai", "anthropic"]),
+            model: z.string(),
+        }).optional(),
         systemMessage: z.string().optional(),
     })
     .strict();
