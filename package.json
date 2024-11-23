@@ -10,6 +10,7 @@
     "prepare": "relative-deps"
   },
   "dependencies": {
+    "@doist/todoist-api-typescript": "^3.0.3",
     "@hono/node-server": "^1.13.2",
     "@hono/zod-validator": "^0.4.1",
     "@mendable/firecrawl-js": "^1.7.2",

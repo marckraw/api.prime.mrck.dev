@@ -29,6 +29,7 @@ apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
 apiRouter.route('/ai_devs', aiDevs)
+apiRouter.route('/tasls', taskRouter)
 apiRouter.route('/google', googleRouter)
 apiRouter.get('/resource', (c) => c.json({ message: 'Protected resource' }))
 
