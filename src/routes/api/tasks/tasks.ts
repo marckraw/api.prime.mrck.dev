@@ -50,7 +50,7 @@ taskRouter.get('/today', async (c) => {
       labels: task.labels
     }))
 
-    return c.json({ tasks: todayAndOverdueTasks, debug: { totalTasks: tasks.length, filteredTasks: todayAndOverdueTasks.length } })
+    return c.json({ tasks: todayAndOverdueTasks, debug: {totalTasks: tasks.length, filteredTasks: todayAndOverdueTasks.length} })
   } catch (error) {
     console.error('Error fetching tasks:', error)
     return c.json({ error: 'Failed to fetch tasks' }, 500)

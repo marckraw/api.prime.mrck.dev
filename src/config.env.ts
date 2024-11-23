@@ -16,7 +16,8 @@ const envSchema = z.object({
     LOG_LEVEL: z.string(),
     TODOIST_API_KEY: z.string().default(''),
     ASANA_ACCESS_TOKEN: z.string().default(''),
-    ASANA_WORKSPACE_GID: z.string().default('')
+    ASANA_WORKSPACE_GID: z.string().default(''),
+    GITHUB_ACCESS_TOKEN: z.string().default('')
 })
 
 // Parse and validate environment variables

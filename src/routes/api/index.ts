@@ -8,6 +8,7 @@ import aiDevs from "./ai_devs/aiDevs";
 import googleRouter from './google/dupa'
 import { config } from "../../config.env";
 import { cors } from 'hono/cors'
+import issueRouter from "./issues/issues";
 
 const apiRouter = new Hono()
 apiRouter.use('/*', cors({
@@ -28,6 +29,7 @@ apiRouter.route('/chat', chatRouter)
 apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
+apiRouter.route('/issues', issueRouter)
 apiRouter.route('/ai_devs', aiDevs)
 apiRouter.route('/tasls', taskRouter)
 apiRouter.route('/google', googleRouter)
