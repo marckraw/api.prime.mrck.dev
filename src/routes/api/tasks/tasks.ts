@@ -1,6 +1,4 @@
 import { Hono } from 'hono'
-import { zValidator } from '@hono/zod-validator'
-import { createTaskSchema, updateTaskSchema } from './validators/tasks'
 import { config } from '../../../config.env'
 import { TodoistApi } from '@doist/todoist-api-typescript'
 
@@ -11,15 +9,6 @@ async function fetchTodoistTasks() {
   try {
     const tasks = await api.getTasks()
     return tasks
-    // return tasks.map(task => ({
-    //   id: task.id,
-    //   title: task.content,
-    //   description: task.description,
-    //   dueDate: task.due?.date,
-    //   status: task.isCompleted ? 'COMPLETED' : 'TODO',
-    //   url: task.url,
-    //   priority: task.priority
-    // }))
   } catch (error) {
     console.error('Error fetching Todoist tasks:', error)
     throw error
@@ -61,7 +50,7 @@ taskRouter.get('/today', async (c) => {
       labels: task.labels
     }))
 
-    return c.json({ tasks: todayAndOverdueTasks })
+    return c.json({ tasks: todayAndOverdueTasks, debug: { totalTasks: tasks.length, filteredTasks: todayAndOverdueTasks.length } })
   } catch (error) {
     console.error('Error fetching tasks:', error)
     return c.json({ error: 'Failed to fetch tasks' }, 500)
