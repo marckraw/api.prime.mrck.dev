@@ -15,9 +15,9 @@ chatRouter.post('/',
         const requestData = c.req.valid('json');
 
         const anton = AntonSDK.create({
-            model: "claude-3-5-sonnet-20240620",
-            apiKey: config.ANTHROPIC_API_KEY,
-            type: "anthropic",
+            model: "gpt-4o-mini",
+            apiKey: config.OPENAI_API_KEY,
+            type: "openai",
         });
 
         if (anton) {
