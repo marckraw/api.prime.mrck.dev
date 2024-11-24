@@ -17,7 +17,10 @@ const envSchema = z.object({
     TODOIST_API_KEY: z.string().default(''),
     ASANA_ACCESS_TOKEN: z.string().default(''),
     ASANA_WORKSPACE_GID: z.string().default(''),
-    GITHUB_ACCESS_TOKEN: z.string().default('')
+    GITHUB_ACCESS_TOKEN: z.string().default(''),
+    STRAVA_CLIENT_ID: z.string(),
+    STRAVA_CLIENT_SECRET: z.string(),
+    STRAVA_REFRESH_TOKEN: z.string(),
 })
 
 // Parse and validate environment variables

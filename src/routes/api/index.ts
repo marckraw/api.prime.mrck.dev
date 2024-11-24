@@ -6,9 +6,10 @@ import taskRouter from "./tasks/tasks";
 import imageRouter from "./images/images";
 import aiDevs from "./ai_devs/aiDevs";
 import googleRouter from './google/dupa'
+import issueRouter from "./issues/issues";
+import stravaRouter from "./strava/strava";
 import { config } from "../../config.env";
 import { cors } from 'hono/cors'
-import issueRouter from "./issues/issues";
 
 const apiRouter = new Hono()
 apiRouter.use('/*', cors({
@@ -30,8 +31,8 @@ apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
 apiRouter.route('/issues', issueRouter)
-apiRouter.route('/ai_devs', aiDevs)
-apiRouter.route('/tasls', taskRouter)
+apiRouter.route('/ai_devs', aiDevs)   
+apiRouter.route('/strava', stravaRouter)
 apiRouter.route('/google', googleRouter)
 apiRouter.get('/resource', (c) => c.json({ message: 'Protected resource' }))
 
