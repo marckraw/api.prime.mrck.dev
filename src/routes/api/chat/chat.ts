@@ -5,7 +5,6 @@ import {zValidator} from "@hono/zod-validator";
 import {chatRequestSchema, chatStreamRequestSchema} from "./validators/chat";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
-import { request } from "http";
 
 const chatRouter = new Hono()
 
