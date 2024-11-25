@@ -8,6 +8,7 @@ import aiDevs from "./ai_devs/aiDevs";
 import googleRouter from './google/dupa'
 import issueRouter from "./issues/issues";
 import stravaRouter from "./strava/strava";
+import habitRouter from "./habits/habits";
 import { config } from "../../config.env";
 import { cors } from 'hono/cors'
 
@@ -31,6 +32,7 @@ apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
 apiRouter.route('/issues', issueRouter)
+apiRouter.route('/habits', habitRouter)
 apiRouter.route('/ai_devs', aiDevs)   
 apiRouter.route('/strava', stravaRouter)
 apiRouter.route('/google', googleRouter)

@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { config } from '../../../config.env'
+import { startOfDay, endOfDay, getUnixTime } from 'date-fns'
 
 const stravaRouter = new Hono()
 
@@ -53,6 +54,46 @@ stravaRouter.get('/activities', async (c) => {
     
     const response = await fetch(
       'https://www.strava.com/api/v3/athlete/activities?per_page=2',
+      {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Accept': 'application/json',
+        },
+      }
+    )
+
+    if (!response.ok) {
+      throw new Error(`Strava API error! status: ${response.status}`)
+    }
+
+    const activities = await response.json()
+    return c.json({ activities })
+  } catch (error: any) {
+    console.error('Error fetching Strava activities:', error)
+    return c.json({ 
+      error: 'Failed to fetch activities', 
+      details: error?.message || 'Unknown error'
+    }, 500)
+  }
+})
+
+// Get athlete's activities for specific date
+stravaRouter.get('/activities/:date', async (c) => {
+  try {
+    const accessToken = await getStravaAccessToken()
+    
+    const dateParam = c.req.param('date') // Format: 2024-11-12
+    const date = new Date(dateParam)
+    
+    if (isNaN(date.getTime())) {
+      return c.json({ error: 'Invalid date format. Use YYYY-MM-DD' }, 400)
+    }
+    
+    const after = getUnixTime(startOfDay(date))
+    const before = getUnixTime(endOfDay(date))
+    
+    const response = await fetch(
+      `https://www.strava.com/api/v3/athlete/activities?after=${after}&before=${before}`,
       {
         headers: {
           'Authorization': `Bearer ${accessToken}`,
