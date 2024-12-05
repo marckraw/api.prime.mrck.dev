@@ -9,6 +9,7 @@ import googleRouter from './google/dupa'
 import issueRouter from "./issues/issues";
 import stravaRouter from "./strava/strava";
 import habitRouter from "./habits/habits";
+import userRouter from "./users/users";
 import { config } from "../../config.env";
 import { cors } from 'hono/cors'
 
@@ -36,6 +37,7 @@ apiRouter.route('/habits', habitRouter)
 apiRouter.route('/ai_devs', aiDevs)   
 apiRouter.route('/strava', stravaRouter)
 apiRouter.route('/google', googleRouter)
+apiRouter.route('/users', userRouter)
 apiRouter.get('/resource', (c) => c.json({ message: 'Protected resource' }))
 
 export default apiRouter
