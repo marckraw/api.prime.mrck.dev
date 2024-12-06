@@ -11,23 +11,14 @@ import stravaRouter from "./strava/strava";
 import habitRouter from "./habits/habits";
 import userRouter from "./users/users";
 import { config } from "../../config.env";
-import { cors } from 'hono/cors'
 
 const apiRouter = new Hono()
-apiRouter.use('/*', cors({
-  origin: ['http://localhost:8080', 'https://localhost:8080', "https://apiprimemrckdev-production.up.railway.app", "https://prime.mrck.dev", "https://do-not-talk-about-this.vercel.app"], // Add your frontend URL
-  allowMethods: ['POST', 'GET', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
-  exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
-  maxAge: 600,
-  credentials: true
-}))
-
 
 const token = config.X_API_KEY
 
 apiRouter.use('/*', bearerAuth({ token }))
 
+ // Routes
 apiRouter.route('/chat', chatRouter)
 apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)

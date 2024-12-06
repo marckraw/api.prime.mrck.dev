@@ -1,42 +1,51 @@
 import { serve } from '@hono/node-server'
-import { Hono } from 'hono'
+import { Context, Hono } from 'hono'
 import { logger } from 'hono/logger'
 import { config } from './config.env'
 import apiRouter from './routes/api'
 import {pinoLogger} from "./middleware/pino-logger";
-
+import { prettyJSON } from 'hono/pretty-json'
+import { cors } from 'hono/cors'
+import { errorHandler } from './middleware/error'
+import { bodyLimit } from './middleware/upload'
+import { rateLimit } from './middleware/rate-limit'
 
 const app = new Hono()
-app.use(logger())
-app.use(pinoLogger());
+app.use('*', logger())
+app.use('*', prettyJSON())
+app.use('*', pinoLogger());
+app.use('/*', cors({
+  origin: ['http://localhost:8080', 'https://localhost:8080', "https://apiprimemrckdev-production.up.railway.app", "https://prime.mrck.dev", "https://do-not-talk-about-this.vercel.app"], // Add your frontend URL
+  allowMethods: ['POST', 'GET', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+  exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
+  maxAge: 600,
+  credentials: true
+}))
+app.use('*', errorHandler());
+app.use('*', // Limit of the upload file size
+  bodyLimit({
+    maxSize: 50 * 1024 * 1024, // 50MB
+    onError: (c: Context) => c.text('File too large', 413)
+  })
+);
+app.use('*', rateLimit({
+  max: 50,      // 50 requests
+  window: 60,    // per 60 seconds
+  message: 'Rate limit exceeded. Please try again later.'
+}));
 
 app.route('/api', apiRouter)
-
-app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
-
-app.get('/test', (c) => {
-  return c.json({ message: 'Message man!. Hello Hono!' })
-})
-
-app.notFound((c) => {
-  return c.json({ message: 'Not found', statusCode: 404 }, 404)
-})
-
-app.onError((err, c) => {
-  console.error(`${err}`)
-  return c.json({message: 'Default Custom Internal server error', statusCode: 500, additionalInfo: {err, c}}, 500)
-})
 
 export type AppType = typeof app
 
 const port = parseInt(config.PORT) || 3000
-console.log(`Server is running on port ${port}`)
 
 serve({
   fetch: app.fetch,
   port
 })
+
+console.log(`Server is running on port ${port}`)
 
 
