@@ -7,6 +7,7 @@ export const actions = [
     "update_task",
     "get_task",
     "analyze_image",
+    "chat"
 ] as const
 
 

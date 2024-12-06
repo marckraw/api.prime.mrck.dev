@@ -43,14 +43,16 @@ aiRouter.post('/agi', zValidator('json', agiRequestSchema), async (c) => {
     const parsedIntentionValidationResponse = await validateIntention(requestData)
 
     if(parsedIntentionValidationResponse.suggestedAction) {
-        const {suggestedAction, originalMessage} = parsedIntentionValidationResponse
-    
-        const response = await executeAction(suggestedAction, {originalMessage})
-
-        return c.json({parsedIntentionValidationResponse, response})
+        const {suggestedAction} = parsedIntentionValidationResponse
+        try {
+            const response = await executeAction(suggestedAction, {requestData, intention: parsedIntentionValidationResponse})
+            return c.json({response})
+        } catch (error) {
+            return c.json({ error: {message: (error as any).message, code: (error as any).code} }, (error as any).status || 500)
+        }
     }
 
-    return c.json({parsedIntentionValidationResponse})
+    return c.json({response: "No action suggested"})
 })
 
 aiRouter.post('/chat',
