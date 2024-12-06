@@ -9,6 +9,7 @@ import { db } from "../../../db";
 import { eq } from "drizzle-orm";
 import { IntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
 import { improvePromptPrompt } from "../images/prompts";
+import { createBaseAI } from "../../../services/llm.service";
 
 
 const validateIntention = async (requestData: AgiRequest): Promise<any> => {
@@ -30,6 +31,18 @@ const validateIntention = async (requestData: AgiRequest): Promise<any> => {
 }
 
 const agiRouter = new Hono()
+
+agiRouter.post('/test', async (c) => {
+    const body = await c.req.json() 
+
+    const ai = createBaseAI({
+        model: "gpt-4o-mini"
+    })
+
+    const response = await ai.chat([{content: "hey", role: "user"}])
+
+    return c.json({ message: response }, 200)
+})
 
 agiRouter.post('/',
     zValidator('json', agiRequestSchema),
