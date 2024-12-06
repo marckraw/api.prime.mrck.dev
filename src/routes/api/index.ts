@@ -1,7 +1,6 @@
 import { Hono } from "hono";
 import { bearerAuth } from 'hono/bearer-auth'
 import chatRouter from "./chat/chat";
-import agiRouter from "./agi/agi";
 import taskRouter from "./tasks/tasks";
 import imageRouter from "./images/images";
 import aiDevs from "./ai_devs/aiDevs";
@@ -22,7 +21,6 @@ apiRouter.use('/*', bearerAuth({ token }))
  // Routes
 apiRouter.route('/chat', chatRouter)
 apiRouter.route('/ai', aiRouter)
-apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
 apiRouter.route('/issues', issueRouter)

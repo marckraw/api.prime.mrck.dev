@@ -4,9 +4,8 @@ import { eq } from "drizzle-orm";
 import { conversations } from "../db/schema/conversations"
 import { messages } from "../db/schema/conversations"
 import { actions, IntentionValidationResponse } from "../routes/api/ai/prompts/intentionValidationPrompts"
-import { createChatService } from "./conversation"
 import { createImageService } from "./images"
-import { AgiRequest, AgiResponse } from "../routes/api/ai/validation/agi";
+import { AgiRequest } from "../routes/api/ai/validation/agi";
 import { config } from "../config.env";
 import { AntonSDK } from "@mrck-labs/anton-sdk";
 
