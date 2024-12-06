@@ -1,19 +1,18 @@
 import {Hono} from "hono";
 import {AntonSDK} from "@mrck-labs/anton-sdk";
 import {zValidator} from "@hono/zod-validator";
-import {AgiRequest, agiRequestSchema, AgiResponse} from "./validators/agi";
+import {AgiRequest, agiRequestSchema, AgiResponse} from "../ai/validation/agi";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
 import { conversations, messages } from "../../../db/schema/conversations";
 import { db } from "../../../db";
 import { eq } from "drizzle-orm";
-import { IntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
+import { createIntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
 import { improvePromptPrompt } from "../images/prompts";
-import { createBaseAI } from "../../../services/llm.service";
 
 
 const validateIntention = async (requestData: AgiRequest): Promise<any> => {
-    const intentionValidator = new IntentionValidator()
+    const intentionValidator = createIntentionValidator()
         
     try {
         const intentionValidationResponse = await intentionValidator.validateAndClassify({
@@ -31,18 +30,6 @@ const validateIntention = async (requestData: AgiRequest): Promise<any> => {
 }
 
 const agiRouter = new Hono()
-
-agiRouter.post('/test', async (c) => {
-    const body = await c.req.json() 
-
-    const ai = createBaseAI({
-        model: "gpt-4o-mini"
-    })
-
-    const response = await ai.chat([{content: "hey", role: "user"}])
-
-    return c.json({ message: response }, 200)
-})
 
 agiRouter.post('/',
     zValidator('json', agiRequestSchema),

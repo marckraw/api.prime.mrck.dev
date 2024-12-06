@@ -10,6 +10,7 @@ import issueRouter from "./issues/issues";
 import stravaRouter from "./strava/strava";
 import habitRouter from "./habits/habits";
 import userRouter from "./users/users";
+import aiRouter from "./ai/ai";
 import { config } from "../../config.env";
 
 const apiRouter = new Hono()
@@ -20,6 +21,7 @@ apiRouter.use('/*', bearerAuth({ token }))
 
  // Routes
 apiRouter.route('/chat', chatRouter)
+apiRouter.route('/ai', aiRouter)
 apiRouter.route('/agi', agiRouter)
 apiRouter.route('/images', imageRouter)
 apiRouter.route('/tasks', taskRouter)
