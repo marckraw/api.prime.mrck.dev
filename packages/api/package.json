@@ -1,5 +1,6 @@
 {
   "name": "api.prime.mrck.dev",
+  "private": true,
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
