@@ -1,0 +1,9 @@
+{
+    "$schema": "https://turborepo.org/schema.json",
+    "envMode": "loose",
+    "tasks": {
+      "test:run": {
+        "cache": false
+      }
+    }
+  }
