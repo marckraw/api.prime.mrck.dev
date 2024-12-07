@@ -38,7 +38,7 @@ export const getImageAsBase64 = async (imageUrl: string): Promise<string> => {
 
 imageRouter.post('/analyze', zValidator('json', analyzeImageSchema), async (c) => {
   try {
-    const { imageUrl, model, debug } = await c.req.valid('json')    
+    const { imageUrl, model, debug } = await c.req.valid('json')
 
     let anton;
     if(model) {

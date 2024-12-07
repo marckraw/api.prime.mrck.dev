@@ -5,7 +5,7 @@ import {zValidator} from "@hono/zod-validator";
 import {chatRequestSchema, chatStreamRequestSchema} from "./validation/ai";
 import { mainSystemMessage } from "../../../anton-config/config";
 import { config } from "../../../config.env";
-import { AgiRequest, agiRequestSchema } from "../ai/validation/agi";
+import { AgiRequest, agiRequestSchema } from "./validation/agi";
 import { createIntentionValidator } from "../../../services/IntentionValidator/IntentionValidator";
 import { intentionValidationSchema } from "./prompts/intentionValidationPrompts";
 import { IntentionValidationResponse } from "./prompts/intentionValidationPrompts";
