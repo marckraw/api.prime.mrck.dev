@@ -12,7 +12,8 @@
     "test": "turbo run test",
     "test:run": "turbo run test:run",
     "test:coverage": "turbo run test:coverage",
-    "test:ui": "turbo run test:ui"
+    "test:ui": "turbo run test:ui",
+    "release": "turbo build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
