@@ -4,6 +4,12 @@
     "tasks": {
       "test:run": {
         "cache": false
-      }
+      },
+      "test:coverage": {
+        "cache": false
+      },
+      "test:ui": {
+        "cache": false
+      } 
     }
   }
