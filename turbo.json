@@ -2,8 +2,17 @@
     "$schema": "https://turborepo.org/schema.json",
     "envMode": "loose",
     "tasks": {
+      "build": {
+        "cache": true
+      },
       "test:run": {
         "cache": false
-      }
+      },
+      "test:coverage": {
+        "cache": false
+      },
+      "test:ui": {
+        "cache": false
+      } 
     }
   }

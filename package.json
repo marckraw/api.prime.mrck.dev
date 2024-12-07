@@ -9,7 +9,10 @@
     "changeset": "changeset",
     "version": "changeset version",
     "publish": "changeset publish",
-    "test:run": "turbo run test:run"
+    "test": "turbo run test",
+    "test:run": "turbo run test:run",
+    "test:coverage": "turbo run test:coverage",
+    "test:ui": "turbo run test:ui"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",

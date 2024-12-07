@@ -6,6 +6,12 @@ export interface ApiResponse<T> {
     status: number
     message: string
   }
+
+  export interface Sample {
+    name: string
+  }
+
+  console.log("whatever")
   
   export const apiResponseSchema = <T extends z.ZodType>(dataSchema: T) =>
     z.object({
