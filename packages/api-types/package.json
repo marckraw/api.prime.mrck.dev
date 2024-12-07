@@ -1,19 +1,19 @@
 {
-    "name": "@mrck-labs/api.prime.mrck.dev",
-    "version": "0.0.1",
-    "main": "dist/index.js",
-    "types": "dist/index.d.ts",
-    "files": [
-      "dist"
-    ],
-    "scripts": {
-      "build": "tsc",
-      "dev": "tsc -w"
-    },
-    "dependencies": {
-      "zod": "^3.22.0"
-    },
-    "publishConfig": {
-      "access": "public"
-    }
+  "name": "@mrck-labs/api.prime.mrck.dev",
+  "version": "0.1.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc -w"
+  },
+  "dependencies": {
+    "zod": "^3.22.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
+}
