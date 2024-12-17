@@ -16,7 +16,7 @@ app.use('*', logger())
 app.use('*', prettyJSON())
 app.use('*', pinoLogger());
 app.use('/*', cors({
-  origin: ['http://localhost:8080', 'https://localhost:8080', "https://apiprimemrckdev-production.up.railway.app", "https://prime.mrck.dev", "https://do-not-talk-about-this.vercel.app"], // Add your frontend URL
+  origin: ['https://plugins.storyblok.com', 'http://localhost:8080', 'https://localhost:8080', "https://apiprimemrckdev-production.up.railway.app", "https://prime.mrck.dev", "https://do-not-talk-about-this.vercel.app"], // Add your frontend URL
   allowMethods: ['POST', 'GET', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization'],
   exposeHeaders: ['Content-Length', 'X-Kuma-Revision'],
