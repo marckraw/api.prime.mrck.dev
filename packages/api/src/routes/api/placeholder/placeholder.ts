@@ -29,7 +29,7 @@ placeholderRouter.get('/', async (c) => {
     ]
     
 
-    return c.json({ placeholder: formattedPlaceholder })
+    return c.json([ ... formattedPlaceholder ])
   } catch (error) {
     console.error('Error fetching issues:', error)
     return c.json({ error: 'Failed to fetch issues' }, 500)
