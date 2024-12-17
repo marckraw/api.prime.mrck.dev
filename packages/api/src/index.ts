@@ -9,6 +9,7 @@ import { cors } from 'hono/cors'
 import { errorHandler } from './middleware/error'
 import { bodyLimit } from './middleware/upload'
 import { rateLimit } from './middleware/rate-limit'
+import placeholderRouter from './routes/api/placeholder/placeholder'
 
 const app = new Hono()
 app.use('*', logger())
@@ -36,6 +37,7 @@ app.use('*', rateLimit({
 }));
 
 app.route('/api', apiRouter)
+app.route('/placeholder', placeholderRouter)
 
 export type AppType = typeof app
 
