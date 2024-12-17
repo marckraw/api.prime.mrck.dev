@@ -6,6 +6,7 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "api:dev": "turbo run dev --filter=api.prime.mrck.dev",
     "changeset": "changeset",
     "version": "changeset version",
     "publish": "changeset publish",
