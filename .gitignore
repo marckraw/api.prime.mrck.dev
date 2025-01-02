@@ -33,3 +33,4 @@ lerna-debug.log*
 .vs_code
 .vscode
 .turbo
+local_files
