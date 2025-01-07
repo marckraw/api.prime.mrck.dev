@@ -528,11 +528,6 @@ aiDevs.get("/2-1", async (c) => {
 });
 
 aiDevs.get("/2-2", async (c) => {
-  // 1. generate transcript from mp3 file
-  // 2. build common context for my prompt
-  // 3. find an answer about on what street is profesor Maj teaching
-  // 4.
-
   const anton = AntonSDK.create({
     model: "gpt-4o",
     apiKey: process.env.OPENAI_API_KEY as string,
@@ -557,7 +552,6 @@ aiDevs.get("/2-2", async (c) => {
       console.log(file_path);
 
       try {
-        // Get transcript for each audio file
         const base64Image = await imageService.getImageAsBase64FromLocalFile(
           file_path
         );
@@ -685,6 +679,204 @@ aiDevs.get("/2-3", async (c) => {
       image,
       imageUrl,
       robotDescription,
+    },
+  });
+});
+
+const avoidFacts = (file: string) => {
+  return file !== 'facts';
+};
+
+const categorize = async (content: string, anton: any) => {
+  const response = await anton.chat({
+    messages: [
+      {
+        role: "user",
+        content: `
+        This is a daily report. Some of them are regular technical reports, while others are security-related reports. The data collected is in various formats and not all of it contains useful data. Please only retrieve for us the notes containing information about people captured or traces of their presence and hardware failures fixed (ignore those related to software).
+        
+        Categorize below <content> with "people" or "hardware". If its not clear which one, return "dunno". 
+        The rules is you are looking for information about captured people or repaired HARDWARE. Ignore the software mentions.
+        Take some time to think about it. Do not rush. There will be misleading information.
+        Never every return anything else.
+        Always return just one word. It's an order!
+        <content>
+        ${content}
+        </content>
+        `,
+      },
+    ],
+  });
+
+  return response[0].content;
+};
+
+aiDevs.get("/2-4", async (c) => {
+  const anton = AntonSDK.create({
+    model: "gpt-4o",
+    apiKey: process.env.OPENAI_API_KEY as string,
+    type: "openai",
+  });
+
+  const files_dir = `${process.cwd()}/local_files/files_from_factory`;
+
+  // Read all files in directory
+  const files = fs.readdirSync(files_dir)
+    .filter(avoidFacts)
+
+  // Object to store file contents
+  const file_contents: Record<string, any> = {};
+
+  // Process each file based on extension
+  await Promise.all(files.map(async (file) => {
+    const file_extension = file.split('.').pop()?.toLowerCase();
+    const file_path = `${files_dir}/${file}`;
+
+    switch (file_extension) {
+      case 'txt': {
+        try {
+          const content = await fs.promises.readFile(file_path, 'utf-8');
+          file_contents[file] = {
+            content,
+            category: await categorize(content, anton)
+          };
+        } catch (error) {
+          console.error(`Error reading file ${file}:`, error);
+        }
+        break;
+      }
+      case 'mp3': {
+        const transcript = await anton.transcribeAudio(file_path);
+        file_contents[file] = {
+          content: transcript.text,
+          category: await categorize(transcript.text, anton)
+        };
+        break;
+      }
+      case 'png': {
+        const base64Image = await imageService.getImageAsBase64FromLocalFile(
+          file_path
+        );
+
+        const imageContent = await imageService.imageContentFromBase64(
+          base64Image,
+          "openai"
+        );
+
+        const response = await anton.chat({
+          messages: [
+            {
+              role: "user",
+              // @ts-ignore
+              content: [
+                imageContent,
+                {
+                  type: "text",
+                  text: `
+                  Describe an image in detail.
+                  `,
+                },
+              ],
+            },
+          ],
+        });
+
+        file_contents[file] = {
+          content: response[0].content,
+          category: await categorize(response[0].content, anton)
+        };
+
+        console.log(`Found PNG file: ${file} - Will be analyzed with AI later`);
+        break;
+      }
+      default: {
+        console.log(`Unhandled file type for ${file}`);
+      }
+    }
+  }));
+
+  console.log("File contents:", file_contents);
+
+  const hardware_values = Object.values(file_contents).filter(file => file.category === 'hardware');
+  const people_values = Object.values(file_contents).filter(file => file.category === 'people');
+
+  const hardware_keys = Object.entries(file_contents)
+    .filter(([_, file]) => file.category === 'hardware')
+    .map(([key]) => key)
+    .sort();
+
+  const people_keys = Object.entries(file_contents)
+    .filter(([_, file]) => file.category === 'people')
+    .map(([key]) => key)
+    .sort();
+  const results = {
+    hardware: hardware_keys,
+    people: people_keys
+  }
+
+  const resultToSend = {
+    hardware: hardware_keys,
+    people: people_keys
+  }
+    
+  console.log("This is results");
+  console.log(resultToSend);
+
+  const responseFromCentrala = await fetch(
+    "https://centrala.ag3nts.org/report ",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        task: "kategorie",
+        apikey: AI_DEVS_API_KEY,
+        answer: resultToSend,
+      }),
+    }
+  );
+
+  const responseFromCentralaJson = await responseFromCentrala.json();
+
+  return c.json({
+    response: {
+      file_contents,
+      files,
+      resultToSend,
+      responseFromCentralaJson
+    },
+  });
+});
+
+aiDevs.get("/2-5", async (c) => {
+  const anton = AntonSDK.create({
+    model: "gpt-4o",
+    apiKey: process.env.OPENAI_API_KEY as string,
+    type: "openai",
+  });
+
+  const response = await fetch(
+    `https://centrala.ag3nts.org/data/${AI_DEVS_API_KEY}/arxiv.txt`
+  );
+  const pytaniaZCentrali = await response.text();
+
+  
+
+  // const responseFromCentrala = await fetch(
+  //   "https://centrala.ag3nts.org/report ",
+  //   {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       task: "kategorie",
+  //       apikey: AI_DEVS_API_KEY,
+  //       answer: resultToSend,
+  //     }),
+  //   }
+  // );
+
+  // const responseFromCentralaJson = await responseFromCentrala.json();
+
+  return c.json({
+    response: {
+      pytaniaZCentrali
     },
   });
 });
