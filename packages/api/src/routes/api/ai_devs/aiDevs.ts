@@ -18,6 +18,7 @@ import { POLIGON_API_VERIFY_URL } from "./constants";
 import { checkCalculationsErrors } from "./helper";
 import { findAndAnswerQuestions } from "./helper";
 import { imageService } from "../../../services/ImageService/image.service";
+import { constructAnswer } from "./helpers/2-5";
 
 const aiDevs = new Hono();
 
@@ -859,26 +860,30 @@ aiDevs.get("/2-5", async (c) => {
   const pytaniaZCentrali = await response.text();
 
   
+const answer = await constructAnswer(pytaniaZCentrali, anton)
 
-  // const responseFromCentrala = await fetch(
-  //   "https://centrala.ag3nts.org/report ",
-  //   {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       task: "kategorie",
-  //       apikey: AI_DEVS_API_KEY,
-  //       answer: resultToSend,
-  //     }),
-  //   }
-  // );
+  const responseFromCentrala = await fetch(
+    "https://centrala.ag3nts.org/report ",
+    {
+      method: "POST",
+      body: JSON.stringify({
+        task: "arxiv",
+        apikey: AI_DEVS_API_KEY,
+        answer: answer,
+      }),
+    }
+  );
 
-  // const responseFromCentralaJson = await responseFromCentrala.json();
+  const responseFromCentralaJson = await responseFromCentrala.json();
 
   return c.json({
     response: {
-      pytaniaZCentrali
+      pytaniaZCentrali,
+      answer,
+      responseFromCentralaJson
     },
   });
 });
 
 export default aiDevs;
+
