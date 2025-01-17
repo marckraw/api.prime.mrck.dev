@@ -14,8 +14,7 @@
     "test:run": "turbo run test:run",
     "test:coverage": "turbo run test:coverage",
     "test:ui": "turbo run test:ui",
-    "release": "turbo build && changeset publish",
-    "prepare": "relative-deps"
+    "release": "turbo build && changeset publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.10",
@@ -25,10 +24,6 @@
     "typescript": "^5.7.2"
   },
   "packageManager": "npm@10.2.4",
-  "relativeDependencies": {
-    "@mrck-labs/anton-sdk": "../anton-suite/libs/anton-sdk",
-    "@mrck-labs/api-interface": "../anton-suite/libs/api-interface"
-  },
   "dependencies": {
     "@mrck-labs/anton-sdk": "^1.3.0",
     "@mrck-labs/api-interface": "^1.2.1",
