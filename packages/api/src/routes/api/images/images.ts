@@ -9,7 +9,11 @@ import { config } from "../../../config.env";
 import { AntonSDK } from "@mrck-labs/anton-sdk";
 import { altTextExtractingPrompt } from "../../../anton-config/config";
 import { improvePromptPrompt } from "./prompts";
-import { imageService } from "../../../services/ImageService/image.service";
+import {
+  createImageService,
+  imageService,
+} from "../../../services/ImageService/image.service";
+import { createChatService } from "../../../services/conversation";
 
 const imageRouter = new Hono();
 
@@ -84,41 +88,79 @@ imageRouter.post(
   zValidator("json", generateImageSchema),
   async (c) => {
     try {
-      const { prompt, model = "dall-e-3", debug } = await c.req.valid("json");
+      const {
+        prompt,
+        model = "dall-e-3",
+        debug,
+        rephrase,
+      } = await c.req.valid("json");
 
-      const anton = AntonSDK.create({
-        model: "gpt-4o-mini",
-        apiKey: config.OPENAI_API_KEY,
-        type: "openai",
-        supportedModelsApiKeys: {
-          leonardoAI: config.LEONARDOAI_API_KEY,
-        },
-      });
+      const imageService = createImageService();
 
       let response;
       if (model === "leonardoai") {
-        response = await anton.createImageWithLeonardo({
+        response = await imageService.generateImageWithLeonardo({
           prompt,
-          alchemy: true,
-          height: 512,
-          modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042", // leonardo phoenix
-          num_images: 1,
+          negative_prompt: "",
           // @ts-ignore
-          presetStyle: "CINEMATIC",
-          width: 512,
+          nsfw: true,
+          num_images: 1,
+          width: 1280,
+          height: 1920,
+          num_inference_steps: 10,
+          contrast: 3.5,
+          guidance_scale: 15,
+          sd_version: "PHOENIX",
+          modelId: "6b645e3a-d64f-4341-a6d8-7a3690fbf042",
+          presetStyle: "LEONARDO",
+          scheduler: "LEONARDO",
+          public: false,
+          tiling: false,
+          alchemy: true,
+          highResolution: false,
+          contrastRatio: 0.5,
+          weighting: 0.75,
+          highContrast: false,
+          expandedDomain: false,
+          photoReal: false,
+          transparency: "disabled",
+          styleUUID: "a5632c7c-ddbb-4e2f-ba34-8456ab3ac436",
+          enhancePrompt: false,
+          ultra: false,
         });
       } else {
-        response = await anton.createImage({
+        response = await imageService.generateImageWithDallE3({
           prompt,
-          model: "dall-e-3",
+        });
+      }
+
+      if (rephrase) {
+        const chatService = createChatService();
+        const rephraseResponse = await chatService.rephrase(
+          {
+            user_request: (response as any).revisedPrompt ?? prompt,
+            your_answer: response?.imageUrl ?? "ERROR: No image created",
+          },
+          {
+            debug: imageService.debug,
+          }
+        );
+
+        return c.json({
+          data: rephraseResponse,
+          ...(debug
+            ? {
+                debug: imageService.debug,
+              }
+            : {}),
         });
       }
 
       return c.json({
-        response,
+        data: response,
         ...(debug
           ? {
-              debug: anton.debug(),
+              debug: imageService.debug,
             }
           : {}),
       });

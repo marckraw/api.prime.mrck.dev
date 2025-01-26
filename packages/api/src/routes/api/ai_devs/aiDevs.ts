@@ -17,7 +17,7 @@ import {
 import { POLIGON_API_VERIFY_URL } from "./constants";
 import { checkCalculationsErrors } from "./helper";
 import { findAndAnswerQuestions } from "./helper";
-import { imageService } from "../../../services/ImageService/image.service";
+import { imageService } from "../../../services/ImageService/image.server.service";
 import { constructAnswer } from "./helpers/2-5";
 
 const aiDevs = new Hono();
@@ -685,7 +685,7 @@ aiDevs.get("/2-3", async (c) => {
 });
 
 const avoidFacts = (file: string) => {
-  return file !== 'facts';
+  return file !== "facts";
 };
 
 const categorize = async (content: string, anton: any) => {
@@ -722,104 +722,111 @@ aiDevs.get("/2-4", async (c) => {
   const files_dir = `${process.cwd()}/local_files/files_from_factory`;
 
   // Read all files in directory
-  const files = fs.readdirSync(files_dir)
-    .filter(avoidFacts)
+  const files = fs.readdirSync(files_dir).filter(avoidFacts);
 
   // Object to store file contents
   const file_contents: Record<string, any> = {};
 
   // Process each file based on extension
-  await Promise.all(files.map(async (file) => {
-    const file_extension = file.split('.').pop()?.toLowerCase();
-    const file_path = `${files_dir}/${file}`;
+  await Promise.all(
+    files.map(async (file) => {
+      const file_extension = file.split(".").pop()?.toLowerCase();
+      const file_path = `${files_dir}/${file}`;
 
-    switch (file_extension) {
-      case 'txt': {
-        try {
-          const content = await fs.promises.readFile(file_path, 'utf-8');
-          file_contents[file] = {
-            content,
-            category: await categorize(content, anton)
-          };
-        } catch (error) {
-          console.error(`Error reading file ${file}:`, error);
+      switch (file_extension) {
+        case "txt": {
+          try {
+            const content = await fs.promises.readFile(file_path, "utf-8");
+            file_contents[file] = {
+              content,
+              category: await categorize(content, anton),
+            };
+          } catch (error) {
+            console.error(`Error reading file ${file}:`, error);
+          }
+          break;
         }
-        break;
-      }
-      case 'mp3': {
-        const transcript = await anton.transcribeAudio(file_path);
-        file_contents[file] = {
-          content: transcript.text,
-          category: await categorize(transcript.text, anton)
-        };
-        break;
-      }
-      case 'png': {
-        const base64Image = await imageService.getImageAsBase64FromLocalFile(
-          file_path
-        );
+        case "mp3": {
+          const transcript = await anton.transcribeAudio(file_path);
+          file_contents[file] = {
+            content: transcript.text,
+            category: await categorize(transcript.text, anton),
+          };
+          break;
+        }
+        case "png": {
+          const base64Image = await imageService.getImageAsBase64FromLocalFile(
+            file_path
+          );
 
-        const imageContent = await imageService.imageContentFromBase64(
-          base64Image,
-          "openai"
-        );
+          const imageContent = await imageService.imageContentFromBase64(
+            base64Image,
+            "openai"
+          );
 
-        const response = await anton.chat({
-          messages: [
-            {
-              role: "user",
-              // @ts-ignore
-              content: [
-                imageContent,
-                {
-                  type: "text",
-                  text: `
+          const response = await anton.chat({
+            messages: [
+              {
+                role: "user",
+                // @ts-ignore
+                content: [
+                  imageContent,
+                  {
+                    type: "text",
+                    text: `
                   Describe an image in detail.
                   `,
-                },
-              ],
-            },
-          ],
-        });
+                  },
+                ],
+              },
+            ],
+          });
 
-        file_contents[file] = {
-          content: response[0].content,
-          category: await categorize(response[0].content, anton)
-        };
+          file_contents[file] = {
+            content: response[0].content,
+            category: await categorize(response[0].content, anton),
+          };
 
-        console.log(`Found PNG file: ${file} - Will be analyzed with AI later`);
-        break;
+          console.log(
+            `Found PNG file: ${file} - Will be analyzed with AI later`
+          );
+          break;
+        }
+        default: {
+          console.log(`Unhandled file type for ${file}`);
+        }
       }
-      default: {
-        console.log(`Unhandled file type for ${file}`);
-      }
-    }
-  }));
+    })
+  );
 
   console.log("File contents:", file_contents);
 
-  const hardware_values = Object.values(file_contents).filter(file => file.category === 'hardware');
-  const people_values = Object.values(file_contents).filter(file => file.category === 'people');
+  const hardware_values = Object.values(file_contents).filter(
+    (file) => file.category === "hardware"
+  );
+  const people_values = Object.values(file_contents).filter(
+    (file) => file.category === "people"
+  );
 
   const hardware_keys = Object.entries(file_contents)
-    .filter(([_, file]) => file.category === 'hardware')
+    .filter(([_, file]) => file.category === "hardware")
     .map(([key]) => key)
     .sort();
 
   const people_keys = Object.entries(file_contents)
-    .filter(([_, file]) => file.category === 'people')
+    .filter(([_, file]) => file.category === "people")
     .map(([key]) => key)
     .sort();
   const results = {
     hardware: hardware_keys,
-    people: people_keys
-  }
+    people: people_keys,
+  };
 
   const resultToSend = {
     hardware: hardware_keys,
-    people: people_keys
-  }
-    
+    people: people_keys,
+  };
+
   console.log("This is results");
   console.log(resultToSend);
 
@@ -842,7 +849,7 @@ aiDevs.get("/2-4", async (c) => {
       file_contents,
       files,
       resultToSend,
-      responseFromCentralaJson
+      responseFromCentralaJson,
     },
   });
 });
@@ -859,8 +866,7 @@ aiDevs.get("/2-5", async (c) => {
   );
   const pytaniaZCentrali = await response.text();
 
-  
-const answer = await constructAnswer(pytaniaZCentrali, anton)
+  const answer = await constructAnswer(pytaniaZCentrali, anton);
 
   const responseFromCentrala = await fetch(
     "https://centrala.ag3nts.org/report ",
@@ -880,10 +886,9 @@ const answer = await constructAnswer(pytaniaZCentrali, anton)
     response: {
       pytaniaZCentrali,
       answer,
-      responseFromCentralaJson
+      responseFromCentralaJson,
     },
   });
 });
 
 export default aiDevs;
-

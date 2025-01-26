@@ -7,7 +7,7 @@ import {
   actions,
   IntentionValidationResponse,
 } from "../routes/api/ai/prompts/intentionValidationPrompts";
-import { createImageService } from "./images";
+import { createImageService } from "./ImageService/image.service";
 import { AgiRequest } from "../routes/api/ai/validation/agi";
 import { config } from "../config.env";
 import { AntonSDK } from "@mrck-labs/anton-sdk";
