@@ -11,6 +11,7 @@ import { intentionValidationSchema } from "./prompts/intentionValidationPrompts"
 import { IntentionValidationResponse } from "./prompts/intentionValidationPrompts";
 import { z } from "zod";
 import { executeAction } from "../../../services/action";
+import { ChatResponse, AgiResponse } from "@mrck-labs/api.prime.mrck.dev";
 
 const aiRouter = new Hono();
 
@@ -51,54 +52,122 @@ const validateIntention = async (
 };
 
 aiRouter.post("/agi", zValidator("json", agiRequestSchema), async (c) => {
-  const requestData = c.req.valid("json");
-  const parsedIntentionValidationResponse = await validateIntention(
-    requestData
-  );
+  try {
+    const requestData = c.req.valid("json");
+    const parsedIntentionValidationResponse = await validateIntention(
+      requestData
+    );
 
-  if (parsedIntentionValidationResponse.suggestedAction) {
-    const { suggestedAction } = parsedIntentionValidationResponse;
-    try {
-      const response = await executeAction(suggestedAction, {
-        requestData,
-        intention: parsedIntentionValidationResponse,
-      });
-      return c.json({ response });
-    } catch (error) {
-      return c.json(
-        {
-          error: { message: (error as any).message, code: (error as any).code },
-        },
-        (error as any).status || 500
-      );
+    if (parsedIntentionValidationResponse.suggestedAction) {
+      const { suggestedAction } = parsedIntentionValidationResponse;
+      try {
+        const response = await executeAction(suggestedAction, {
+          requestData,
+          intention: parsedIntentionValidationResponse,
+        });
+
+        const agiResponse: AgiResponse = {
+          success: true,
+          data: {
+            messages: response.messages || [],
+            conversationId: response.conversationId,
+            suggestedAction,
+            ...(requestData.debug
+              ? {
+                  debug: response.debug,
+                  channel: requestData.channel,
+                  intentionValidation: parsedIntentionValidationResponse,
+                }
+              : {}),
+          },
+        };
+
+        return c.json(agiResponse);
+      } catch (error) {
+        return c.json(
+          {
+            success: false,
+            error: {
+              message: (error as any).message,
+              code: (error as any).code || "EXECUTION_ERROR",
+            },
+          },
+          (error as any).status || 500
+        );
+      }
     }
-  }
 
-  return c.json({ response: "No action suggested" });
+    return c.json({
+      success: true,
+      data: {
+        messages: [
+          {
+            role: "assistant",
+            content: "No action suggested",
+          },
+        ],
+      },
+    });
+  } catch (error) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          message: (error as any).message,
+          code: "INTERNAL_ERROR",
+        },
+      },
+      500
+    );
+  }
 });
 
 aiRouter.post("/chat", zValidator("json", chatRequestSchema), async (c) => {
-  const requestData = c.req.valid("json");
+  try {
+    const requestData = c.req.valid("json");
+    const anton = AntonSDK.create({
+      model: "gpt-4o-mini",
+      apiKey: config.OPENAI_API_KEY,
+      type: "openai",
+    });
 
-  const anton = AntonSDK.create({
-    model: "gpt-4o-mini",
-    apiKey: config.OPENAI_API_KEY,
-    type: "openai",
-  });
-
-  if (anton) {
-    if (requestData.systemMessage) {
-      anton.setSystemMessage?.(requestData.systemMessage);
-    } else {
-      anton.setSystemMessage?.(mainSystemMessage);
+    if (anton) {
+      if (requestData.systemMessage) {
+        anton.setSystemMessage?.(requestData.systemMessage);
+      } else {
+        anton.setSystemMessage?.(mainSystemMessage);
+      }
     }
+
+    const response = await anton.chat({
+      messages: requestData.messages,
+    });
+
+    const chatResponse: ChatResponse = {
+      success: true,
+      data: {
+        messages: [
+          {
+            role: "assistant",
+            content: (response as any)[0].content,
+          },
+        ],
+      },
+    };
+
+    return c.json(chatResponse);
+  } catch (error) {
+    return c.json(
+      {
+        success: false,
+        error: {
+          message: (error as any).message,
+          code: "CHAT_ERROR",
+        },
+      },
+      500
+    );
   }
-
-  const response = await anton.chat({
-    messages: requestData.messages,
-  });
-
-  return c.json({ response });
 });
 
 aiRouter.post("/stream", zValidator("json", chatRequestSchema), (c) => {
