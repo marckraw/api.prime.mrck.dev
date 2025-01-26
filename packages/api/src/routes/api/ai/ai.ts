@@ -12,6 +12,7 @@ import { IntentionValidationResponse } from "./prompts/intentionValidationPrompt
 import { z } from "zod";
 import { executeAction } from "../../../services/action";
 import { ChatResponse, AgiResponse } from "@mrck-labs/api.prime.mrck.dev";
+import { createChatService } from "../../../services/conversation";
 
 const aiRouter = new Hono();
 
@@ -61,20 +62,35 @@ aiRouter.post("/agi", zValidator("json", agiRequestSchema), async (c) => {
     if (parsedIntentionValidationResponse.suggestedAction) {
       const { suggestedAction } = parsedIntentionValidationResponse;
       try {
-        const response = await executeAction(suggestedAction, {
+        const responseFromAction = await executeAction(suggestedAction, {
           requestData,
           intention: parsedIntentionValidationResponse,
         });
+
+        // TODO: create an rephrase service which will take the response and rephrase it to a more human readable format
+        const chatService = createChatService();
+        const response = await chatService.rephrase(
+          {
+            user_request: parsedIntentionValidationResponse.originalMessage,
+            your_answer: responseFromAction.messages[0].content,
+          },
+          {
+            parsedIntentionValidationResponse,
+            requestData,
+          }
+        );
+        console.log("This is response from rephrase: ");
+        console.log(response);
 
         const agiResponse: AgiResponse = {
           success: true,
           data: {
             messages: response.messages || [],
-            conversationId: response.conversationId,
+            conversationId: responseFromAction.conversationId,
             suggestedAction,
             ...(requestData.debug
               ? {
-                  debug: response.debug,
+                  debug: responseFromAction.debug,
                   channel: requestData.channel,
                   intentionValidation: parsedIntentionValidationResponse,
                 }
