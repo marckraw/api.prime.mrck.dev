@@ -149,6 +149,13 @@ aiRouter.post("/chat", zValidator("json", chatRequestSchema), async (c) => {
 
     if (anton) {
       if (requestData.systemMessage) {
+        console.log("#####################");
+        console.log("#####################");
+        console.log("#####################");
+        console.log(requestData.systemMessage);
+        console.log("#####################");
+        console.log("#####################");
+        console.log("#####################");
         anton.setSystemMessage?.(requestData.systemMessage);
       } else {
         anton.setSystemMessage?.(mainSystemMessage);
