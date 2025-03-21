@@ -10,7 +10,7 @@ summary_routes.get("/send-summary", async (c) => {
     const { data, error } = await resend.emails.send({
       from: "Marcin Krawczyk <onboarding@resend.dev>",
       to: ["marckraw@icloud.com"],
-      subject: `Your Daily Summary - ${new Date().toLocaleDateString()}`,
+      subject: `Your Daily Summary - ${new Date().toLocaleDateString()} at ${new Date().getHours()}:${new Date().getMinutes()}`,
       html: await generateDailySummaryHtml(),
     });
 
